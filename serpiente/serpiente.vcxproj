@@ -130,14 +130,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Comida.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="serpiente.cpp" />
+    <ClCompile Include="Parte.cpp" />
+    <ClCompile Include="Serpiente.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="comida.h" />
     <ClInclude Include="geometrias.h" />
     <ClInclude Include="lecturaShader.h" />
-    <ClInclude Include="serpiente.hpp" />
+    <ClInclude Include="parte.h" />
+    <ClInclude Include="serpiente.h" />
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>

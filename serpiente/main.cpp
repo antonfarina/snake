@@ -1,12 +1,14 @@
-//grua con OpenlGL 3.3 de Antonio Farina Elorza y Carla Castedo Pereira
 #include <glad.h>
 #include <glfw3.h>
 #include <stdio.h>
 #include <iostream>
 #include <lecturaShader.h>
-#include "geometrias.h"
 #include <string>
-#include "serpiente.hpp"
+
+
+#include "geometrias.h"
+#include "serpiente.h"
+#include "comida.h"
 
 //transformaciones
 #include <glm/glm.hpp>
@@ -31,6 +33,8 @@ GLuint VAOCubo;
 GLuint VAOEsfera;
 
 Serpiente serpiente(3, &VAOCubo, 36);
+
+GLuint texturaSerpiente1, texturaSerpiente2;
 
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -134,7 +138,7 @@ void dibujaSuelo(GLuint shaderProgram) {
 			//Calculo la matriz
 			model = glm::mat4(); //identity matrix
 			//trasladamos para dibujar cada cuadrado
-			model = glm::scale(model, glm::vec3(0.3, 0.3, 1));
+			model = glm::scale(model, glm::vec3(ESCALA, ESCALA, 1));
 			model = glm::translate(model, glm::vec3(i, j, 0.0f));
 			//glBindTexture(GL_TEXTURE_2D, sueloTex);
 			//La cargo
@@ -224,11 +228,14 @@ int main() {
 	creaVAO(vertices_cuadrado, sizeof(vertices_cuadrado), &VAOCuadrado, 1);
 	creaVAO(vertices_esfera, sizeof(vertices_esfera), &VAOEsfera, 0);
 	creaVAO(vertices_cubo, sizeof(vertices_cubo), &VAOCubo, 1);
-	//serpiente.estableceVAO(VAOCubo, 36, VAOCubo, 36);
 
+	//creamos las texturas
+	cargaTextura(&texturaSerpiente1,"../texturas/serpiente_verde.jpg");
+	cargaTextura(&texturaSerpiente2, "../texturas/serpiente_amarilla.jpg");
+	serpiente.texturizar(texturaSerpiente1, texturaSerpiente2);
 	// Lazo de la ventana mientras no la cierre
 	// -----------
-	glm::mat4 model;
+	Comida comida(ESCALA, &VAOCubo, 0, 36, 0, serpiente);
 	while (!glfwWindowShouldClose(window)){
 		// input
 		// -----
@@ -240,8 +247,9 @@ int main() {
 		//Dibujo del suelo
 		dibujaSuelo(shaderProgram);
 
-		serpiente.dibujar(shaderProgram, model);
-		if(comenzar)serpiente.avanzar();
+		serpiente.dibujar(shaderProgram);
+		comida.dibujar(shaderProgram);
+		if(comenzar)serpiente.avanzar(&comida);
 		glBindVertexArray(0);
 
 		glfwSwapBuffers(window);
@@ -268,22 +276,46 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	switch (key){
 		//movimiento de la serpiente
 		case 265://flecha arriba
-			if (serpiente.getDireccion() != ABAJO) {
+			if (serpiente.getDireccion() != ABAJO && action == GLFW_RELEASE) {
+				if (serpiente.getDireccion() == IZQUIERDA) {
+					serpiente.girar(-90);
+				}
+				else {
+					serpiente.girar(90);
+				}
 				serpiente.setDireccion(ARRIBA);
 			}
 			break;
 		case 264://flecha abajo
-			if (serpiente.getDireccion() != ARRIBA) {
+			if (serpiente.getDireccion() != ARRIBA && action == GLFW_RELEASE) {
+				if (serpiente.getDireccion() == IZQUIERDA) {
+					serpiente.girar(90);
+				}
+				else {
+					serpiente.girar(-90);
+				}
 				serpiente.setDireccion(ABAJO);
 			}
 			break;
 		case 262://flecha derecha
-			if (serpiente.getDireccion() != IZQUIERDA) {
+			if (serpiente.getDireccion() != IZQUIERDA && action == GLFW_RELEASE) {
+				if (serpiente.getDireccion() == ARRIBA) {
+					serpiente.girar(-90);
+				}
+				else {
+					serpiente.girar(90);
+				}
 				serpiente.setDireccion(DERECHA);
 			}
 			break;
 		case 263://flecha izquierda
-			if (serpiente.getDireccion() != DERECHA) {
+			if (serpiente.getDireccion() != DERECHA && action == GLFW_RELEASE) {
+				if (serpiente.getDireccion() == ARRIBA) {
+					serpiente.girar(90);
+				}
+				else {
+					serpiente.girar(-90);
+				}
 				serpiente.setDireccion(IZQUIERDA);
 			}
 		break;

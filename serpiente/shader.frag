@@ -15,5 +15,10 @@ uniform vec3 lightColor;
 uniform sampler2D texture1;
 
 void main(){
-	FragColor=vec4(objectColor, 1.0f);
+	if(texture2D(texture1, TexCoord) == vec4(0.0,0.0,0.0,1.0)){
+		FragColor=vec4(objectColor, 1.0f);
+	}else{
+		FragColor=vec4(1.0, 1.0, 1.0, 1.0f) * texture2D(texture1, TexCoord);
+	}
+	
 }
