@@ -22,7 +22,7 @@ Serpiente::Serpiente(int longitud, GLuint* VAO, int nTriangulos) {
         this->cuerpo.push_back(Parte(i, 0, ESCALA, 0, VAO, 0, 36));
     }
     this->anterior = 0;
-    this->velocidad = 1;
+    this->velocidad = VELOCIDAD;
 }
 
 void Serpiente::avanzar(Comida* comida) {

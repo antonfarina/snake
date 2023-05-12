@@ -14,6 +14,7 @@
 #define DERECHA 3
 #define LIMITE 10
 #define ESCALA 0.3
+#define VELOCIDAD 0.3
 
 class Serpiente {
     private:

@@ -10,5 +10,6 @@ class Comida: public Parte {
 		int tipo;
 	public:
 		void colocar(class Serpiente *s);
-		Comida(float escalado, GLuint* geometria, GLuint textura, GLuint n, int tipo, class Serpiente s);
+		Comida(float escalado, float giro, GLuint* geometria, GLuint textura, GLuint n, int tipo, class Serpiente s);
+		void dibujar(GLuint shader);
 };

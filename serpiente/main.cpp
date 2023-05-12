@@ -34,7 +34,7 @@ GLuint VAOEsfera;
 
 Serpiente serpiente(3, &VAOCubo, 36);
 
-GLuint texturaSerpiente1, texturaSerpiente2;
+GLuint texturaSerpiente1, texturaSerpiente2, texturaManzana, hierba1, hierba2;
 
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -140,7 +140,13 @@ void dibujaSuelo(GLuint shaderProgram) {
 			//trasladamos para dibujar cada cuadrado
 			model = glm::scale(model, glm::vec3(ESCALA, ESCALA, 1));
 			model = glm::translate(model, glm::vec3(i, j, 0.0f));
-			//glBindTexture(GL_TEXTURE_2D, sueloTex);
+			if ((i + j) % 2) {
+				glBindTexture(GL_TEXTURE_2D, hierba1);
+			}
+			else {
+				glBindTexture(GL_TEXTURE_2D, hierba2);
+			}
+			
 			//La cargo
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 			//dibujamos el cuadrado
@@ -230,12 +236,15 @@ int main() {
 	creaVAO(vertices_cubo, sizeof(vertices_cubo), &VAOCubo, 1);
 
 	//creamos las texturas
-	cargaTextura(&texturaSerpiente1,"../texturas/serpiente_verde.jpg");
+	cargaTextura(&texturaSerpiente1,"../texturas/serpiente_marron.jpg");
 	cargaTextura(&texturaSerpiente2, "../texturas/serpiente_amarilla.jpg");
+	cargaTextura(&texturaManzana, "../texturas/naranja.jpg");
+	cargaTextura(&hierba1, "../texturas/hierba1.jpg");
+	cargaTextura(&hierba2, "../texturas/hierba2.jpg");
 	serpiente.texturizar(texturaSerpiente1, texturaSerpiente2);
 	// Lazo de la ventana mientras no la cierre
 	// -----------
-	Comida comida(ESCALA, &VAOCubo, 0, 36, 0, serpiente);
+	Comida comida(ESCALA/2, -90, &VAOEsfera, texturaManzana, 1080, 0, serpiente);
 	while (!glfwWindowShouldClose(window)){
 		// input
 		// -----
