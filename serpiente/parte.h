@@ -7,17 +7,19 @@
 
 class Parte {
     protected:
-        float x, y;
+        float x, y, z;
         GLuint textura, * geometria, nTriangulos;
         float escalado;
         int giro;
     public:
         Parte();
-        Parte(float x, float y, float escalado, int giro, GLuint* geometria, GLuint textura, GLuint n);
+        Parte(float x, float y, float z, float escalado, int giro, GLuint* geometria, GLuint textura, GLuint n);
         void setX(float x);
         float getX();
         void setY(float y);
         float getY();
+        void setZ(float z);
+        float getZ();
         float getEscalado();
         void setEscalado(float escalado);
         void setGiro(int giro);

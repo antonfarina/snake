@@ -49,14 +49,14 @@ void camaraAlejada() {
 	//Cargamos la identidad
 	view = glm::mat4();
 	//establecemos la posicion del observador
-	view = glm::lookAt(glm::vec3(0,0,5), glm::vec3(.0f, .0f, .0f), glm::vec3(.0f,1, .0f));
+	view = glm::lookAt(glm::vec3(0, 0, 20 * ESCALA), glm::vec3(.0f, .0f, .0f), glm::vec3(.0f,1, .0f));
 	unsigned int viewLoc = glad_glGetUniformLocation(shaderProgram, "view");
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	//Matriz de proyección
 	glm::mat4 projection;
 	//Cargamos la identidad
 	projection = glm::mat4();
-	projection = glm::perspective(20.0f,(float) ANCHO/ (float) ALTO, 0.01f, 10.0f);
+	projection = glm::perspective(45.0f,(float) ANCHO/ (float) ALTO, 0.01f, 21.0f);
 	unsigned int projectionLoc = glad_glGetUniformLocation(shaderProgram, "projection");
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 }
@@ -68,14 +68,14 @@ void camaraCabeza() {
 	//Cargamos la identidad
 	view = glm::mat4();
 	//establecemos la posicion del observador
-	view = glm::lookAt(glm::vec3(serpiente.getCabeza().getX(), serpiente.getCabeza().getY(), 1), glm::vec3(.0f, .0f, .0f), glm::vec3(.0f, 1, .0f));
+	view = glm::lookAt(glm::vec3(serpiente.getCuerpo()[1].getX()-1, serpiente.getCuerpo()[1].getY()-1, 1), glm::vec3(serpiente.getCabeza().getX(), serpiente.getCabeza().getY(), 1), glm::vec3(.0f, 0, 1.0f));
 	unsigned int viewLoc = glad_glGetUniformLocation(shaderProgram, "view");
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	//Matriz de proyección
 	glm::mat4 projection;
 	//Cargamos la identidad
 	projection = glm::mat4();
-	projection = glm::perspective(45.0f, (float)ANCHO / (float)ALTO, 0.01f, 6.0f);
+	projection = glm::perspective(45.0f, (float)ANCHO / (float)ALTO, 0.01f, 10.0f);
 	unsigned int projectionLoc = glad_glGetUniformLocation(shaderProgram, "projection");
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 }
@@ -138,8 +138,8 @@ void dibujaSuelo(GLuint shaderProgram) {
 			//Calculo la matriz
 			model = glm::mat4(); //identity matrix
 			//trasladamos para dibujar cada cuadrado
+			model = glm::translate(model, glm::vec3(i*ESCALA, j*ESCALA, 0.0f));
 			model = glm::scale(model, glm::vec3(ESCALA, ESCALA, 1));
-			model = glm::translate(model, glm::vec3(i, j, 0.0f));
 			if ((i + j) % 2) {
 				glBindTexture(GL_TEXTURE_2D, hierba1);
 			}
@@ -152,7 +152,6 @@ void dibujaSuelo(GLuint shaderProgram) {
 			//dibujamos el cuadrado
 			glBindVertexArray(VAOCuadrado);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
-			//glBindTexture(GL_TEXTURE_2D, 0);
 		}
 	}
 }
@@ -179,6 +178,7 @@ void cargaTextura(unsigned int* textura, const char* ruta) {
 		formato = GL_RGBA;
 	}
 	if (imagen) {
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glTexImage2D(GL_TEXTURE_2D, 0, formato, width, height, 0, formato, GL_UNSIGNED_BYTE, imagen);
 		glGenerateMipmap(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -207,7 +207,7 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	//Creo la ventana
-	GLFWwindow* window = glfwCreateWindow(ANCHO, ALTO, "Grua con OpenGL 3.3", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(ANCHO, ALTO, "Snake", NULL, NULL);
 	if (window == NULL)	{
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
@@ -238,13 +238,13 @@ int main() {
 	//creamos las texturas
 	cargaTextura(&texturaSerpiente1,"../texturas/serpiente_marron.jpg");
 	cargaTextura(&texturaSerpiente2, "../texturas/serpiente_amarilla.jpg");
-	cargaTextura(&texturaManzana, "../texturas/naranja.jpg");
+	cargaTextura(&texturaManzana, "../texturas/manzana.jpg");
 	cargaTextura(&hierba1, "../texturas/hierba1.jpg");
 	cargaTextura(&hierba2, "../texturas/hierba2.jpg");
 	serpiente.texturizar(texturaSerpiente1, texturaSerpiente2);
 	// Lazo de la ventana mientras no la cierre
 	// -----------
-	Comida comida(ESCALA/2, -90, &VAOEsfera, texturaManzana, 1080, 0, serpiente);
+	Comida comida(ESCALA/2.0, 0, &VAOEsfera, texturaManzana, 1080, 0, serpiente);
 	while (!glfwWindowShouldClose(window)){
 		// input
 		// -----

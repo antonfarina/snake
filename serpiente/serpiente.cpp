@@ -14,15 +14,16 @@ Serpiente::Serpiente(int longitud, GLuint* VAO, int nTriangulos) {
         this->longitud = LIMITE;
     }
     
-    this->cabeza = Parte(0, 0, ESCALA, 0, VAO, 0, 1080);
+    this->cabeza = Parte(0, 0, ESCALA/2.0, ESCALA, 0, VAO, 0, 1080);
     this->direccion = IZQUIERDA;
     //inicializamos las posiciones donde se encuentra el cuerpo de la serpiente
     this->cuerpo.push_back(this->cabeza);
     for (int i = 1; i < longitud; i++) {
-        this->cuerpo.push_back(Parte(i, 0, ESCALA, 0, VAO, 0, 36));
+        this->cuerpo.push_back(Parte(i, 0, ESCALA/2.0, ESCALA, 0, VAO, 0, 36));
     }
     this->anterior = 0;
     this->velocidad = VELOCIDAD;
+    this->puntos = 0;
 }
 
 void Serpiente::avanzar(Comida* comida) {
@@ -64,16 +65,19 @@ void Serpiente::avanzar(Comida* comida) {
                 break;
             default:
                 break;
+                
         }
         //comprobamos si la serpiente come
         if (cabeza.getX() == comida->getX() && cabeza.getY() == comida->getY()) {
             //aumentamos la longitud
             longitud++;
             //añadimos una parte mas a la serpiente al final de todo
-            this->cuerpo.push_back(Parte(cuerpo.back().getX(), cuerpo.back().getY(), cuerpo[0].getEscalado(), cuerpo.back().getGiro(), cuerpo[0].getGeometria(), cuerpo[longitud - 3].getTextura(), 36));
+            this->cuerpo.push_back(Parte(cuerpo.back().getX(), cuerpo.back().getY(), cuerpo.back().getZ(), cuerpo[0].getEscalado(), cuerpo.back().getGiro(), cuerpo[0].getGeometria(), cuerpo[longitud - 3].getTextura(), 36));
             //colocamos nueva comida
             comida->colocar(this);
             if(velocidad - 0.03 > 0.2)velocidad -= 0.02;
+            puntos++;
+            printf("%d\n", puntos);
         }
         //actualizamos las posiciones del cuerpo con la posicion del anterior
         for (std::size_t i = this->longitud - 1; i > 0; i--) {

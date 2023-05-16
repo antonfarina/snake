@@ -13,7 +13,7 @@
 #define IZQUIERDA 2
 #define DERECHA 3
 #define LIMITE 10
-#define ESCALA 0.3
+#define ESCALA 1
 #define VELOCIDAD 0.3
 
 class Serpiente {
@@ -23,6 +23,7 @@ class Serpiente {
         int longitud, direccion;
         double anterior;
         double velocidad;
+        int puntos;
     public:
         Serpiente(int longitud, GLuint* VAOserpiente, int ntriangulos);
         void avanzar(class Comida* comida);
