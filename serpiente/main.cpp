@@ -25,7 +25,8 @@
 GLuint ANCHO = 1200;
 GLuint ALTO = 800;
 
-int comenzar = 0;
+unsigned int comenzar = 0;
+unsigned int perder = 0;
 GLuint shaderProgram;
 
 //VAOS para crear los objetos
@@ -35,7 +36,7 @@ GLuint VAOEsfera;
 
 Serpiente serpiente(3, &VAOCubo, 36, &VAOEsfera, 1080);
 
-GLuint texturaSerpiente1, texturaSerpiente2, hierba1, hierba2, texturaOjo;
+GLuint texturaSerpiente1, texturaSerpiente2, hierba1, hierba2, texturaOjo, texturaPerder;
 std::unordered_map<unsigned int, GLuint> texturasFruta;
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -184,6 +185,7 @@ void cargaTextura(unsigned int* textura, const char* ruta) {
 	//parametros de escala
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	stbi_set_flip_vertically_on_load(true);
 	//cargamos la imagen
 	unsigned char* imagen = stbi_load(ruta, &width, &height, &nrChannels, 0);
 	if (nrChannels == 1) {
@@ -204,9 +206,22 @@ void cargaTextura(unsigned int* textura, const char* ruta) {
 	stbi_image_free(imagen);
 }
 
+void dibujarFin() {
+	unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
+	//matriz de transformacion
+	glm::mat4 model = glm::mat4();
+	model = glm::scale(model, glm::vec3(30,20, 1));
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glBindTexture(GL_TEXTURE_2D, texturaPerder);
+	//La cargo
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+	glBindVertexArray(VAOCuadrado);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
 void openGlInit() {
 	glClearDepth(1.0f); //Valor z-buffer
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f); //valor limpieza buffer color
+	glClearColor(0.0f, 0.0f, 0.1f, 1.0f); //valor limpieza buffer color
 	glEnable(GL_DEPTH_TEST); //z-buffer
 	//glEnable(GL_CULL_FACE); //ocultacion caras back
 	glCullFace(GL_BACK);
@@ -273,6 +288,7 @@ int main() {
 	cargaTextura(&hierba1, "../texturas/hierba1.jpg");
 	cargaTextura(&hierba2, "../texturas/hierba2.jpg");
 	cargaTextura(&texturaOjo, "../texturas/ojo.jpg");
+	cargaTextura(&texturaPerder, "../texturas/perder.jpg");
 	serpiente.texturizar(texturaSerpiente1, texturaSerpiente2, texturaOjo);
 	// Lazo de la ventana mientras no la cierre
 	// -----------
@@ -285,13 +301,23 @@ int main() {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);//Borro el buffer de la ventana
 		glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
 		camaraAlejada();
-		//Dibujo del suelo
-		dibujaSuelo(shaderProgram);
+		if (!perder) {
+			//Dibujo del suelo
+			dibujaSuelo(shaderProgram);
 
-		serpiente.dibujar(shaderProgram);
-		comida.dibujar(shaderProgram);
-		iluminacion(comida);
-		if(comenzar)serpiente.avanzar(&comida);
+			serpiente.dibujar(shaderProgram);
+			comida.dibujar(shaderProgram);
+			if (comenzar) {
+				if (!serpiente.avanzar(&comida)) {
+					perder++;
+					comenzar--;
+				}
+			}
+		}
+		else {
+			dibujarFin();
+		}
+		
 		glBindVertexArray(0);
 
 		glfwSwapBuffers(window);

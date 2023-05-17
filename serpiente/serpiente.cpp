@@ -116,7 +116,6 @@ bool Serpiente::avanzar(Fruta* comida) {
         //comprobamos si hay colisión
         for (int i = 1; i < this->longitud; i++) {
             if (this->cabeza.getX() == this->getCuerpo()[i].getX() && this->cabeza.getY() == this->getCuerpo()[i].getY()) {
-                printf("pierdes\n");
                 return false;
             }
         }
