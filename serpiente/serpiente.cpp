@@ -89,6 +89,13 @@ void Serpiente::avanzar(Fruta* comida) {
                 break;
                 
         }
+        //comprobamos si hay colisión
+        for (int i = 1; i < this->longitud; i++) {
+            if (this->cabeza.getX() == this->getCuerpo()[i].getX() && this->cabeza.getY() == this->getCuerpo()[i].getY()) {
+                printf("pierdes\n");
+                break;
+            }
+        }
         //comprobamos si la serpiente come
         if (cabeza.getX() == comida->getX() && cabeza.getY() == comida->getY()) {
             //aumentamos la longitud
