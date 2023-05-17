@@ -28,7 +28,7 @@ class Serpiente {
         int puntos;
     public:
         Serpiente(int longitud, GLuint* VAOCubo, int nTriangulosCubo, GLuint* VAOEsfera, int nTriangulosEsfera);
-        void avanzar(class Fruta* comida);
+        bool avanzar(class Fruta* comida);
         void setDireccion(int direccion);
         int getDireccion();
         void dibujar(GLuint shader);

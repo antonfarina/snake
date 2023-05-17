@@ -28,7 +28,7 @@ Serpiente::Serpiente(int longitud, GLuint* VAOCubo, int nTriangulosCubo, GLuint*
     this->puntos = 0;
 }
 
-void Serpiente::avanzar(Fruta* comida) {
+bool Serpiente::avanzar(Fruta* comida) {
     double actual = glfwGetTime();
     // Realizar la actualización de la variable si han transcurrido 60 segundos desde la última actualización
     if (actual - anterior >= this->velocidad) {
@@ -89,13 +89,7 @@ void Serpiente::avanzar(Fruta* comida) {
                 break;
                 
         }
-        //comprobamos si hay colisión
-        for (int i = 1; i < this->longitud; i++) {
-            if (this->cabeza.getX() == this->getCuerpo()[i].getX() && this->cabeza.getY() == this->getCuerpo()[i].getY()) {
-                printf("pierdes\n");
-                break;
-            }
-        }
+        
         //comprobamos si la serpiente come
         if (cabeza.getX() == comida->getX() && cabeza.getY() == comida->getY()) {
             //aumentamos la longitud
@@ -119,7 +113,16 @@ void Serpiente::avanzar(Fruta* comida) {
         this->cuerpo[0] = this->cabeza;
         //reestablecemos el tiempo
         anterior = actual;
+        //comprobamos si hay colisión
+        for (int i = 1; i < this->longitud; i++) {
+            if (this->cabeza.getX() == this->getCuerpo()[i].getX() && this->cabeza.getY() == this->getCuerpo()[i].getY()) {
+                printf("pierdes\n");
+                return false;
+            }
+        }
+        return true;
     }
+    return true;
 }
 
 void Serpiente::setDireccion(int direccion){
