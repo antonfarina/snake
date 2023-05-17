@@ -8,8 +8,8 @@ Parte::Parte(float x, float y, float z, float escalado, int giro, GLuint* geomet
     this->x = x;
     this->y = y;
     this->z = z;
-    this->giro = giro;
     this->escalado = escalado;
+    this->giro = giro;
     this->geometria = geometria;
     this->textura = textura;
     this->nTriangulos = n;

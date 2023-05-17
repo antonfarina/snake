@@ -1,12 +1,11 @@
-
 #include <iostream>
 #include "parte.h"
-#include "comida.h"
+#include "fruta.h"
 #include "serpiente.h"
 #include <glfw3.h>
 
 //constructor
-Serpiente::Serpiente(int longitud, GLuint* VAO, int nTriangulos) {
+Serpiente::Serpiente(int longitud, GLuint* VAOCubo, int nTriangulosCubo, GLuint* VAOEsfera, int nTriangulosEsfera) {
     //si la logitud no se sale del campo se establece a la longitud
     if (longitud < LIMITE) {
         this->longitud = longitud;
@@ -14,19 +13,22 @@ Serpiente::Serpiente(int longitud, GLuint* VAO, int nTriangulos) {
         this->longitud = LIMITE;
     }
     
-    this->cabeza = Parte(0, 0, ESCALA/2.0, ESCALA, 0, VAO, 0, 1080);
+    this->cabeza = Parte(0, 0, ESCALA / 2.0, ESCALA, 0, VAOCubo, 0, nTriangulosCubo);
+    //creamos los ojos
+    this->ojoDerecho = Parte(-0.3/0.15, 0.25/0.15, 1/0.15, 0.15, 0, VAOEsfera, 0, nTriangulosEsfera);
+    this->ojoIzquierdo = Parte(-0.3/0.15, -0.25/0.15, 1/0.15, 0.15, 0, VAOEsfera, 0, nTriangulosEsfera);
     this->direccion = IZQUIERDA;
     //inicializamos las posiciones donde se encuentra el cuerpo de la serpiente
     this->cuerpo.push_back(this->cabeza);
     for (int i = 1; i < longitud; i++) {
-        this->cuerpo.push_back(Parte(i, 0, ESCALA/2.0, ESCALA, 0, VAO, 0, 36));
+        this->cuerpo.push_back(Parte(i, 0, ESCALA/2.0, ESCALA, 0, VAOCubo, 0, nTriangulosCubo));
     }
     this->anterior = 0;
     this->velocidad = VELOCIDAD;
     this->puntos = 0;
 }
 
-void Serpiente::avanzar(Comida* comida) {
+void Serpiente::avanzar(Fruta* comida) {
     double actual = glfwGetTime();
     // Realizar la actualización de la variable si han transcurrido 60 segundos desde la última actualización
     if (actual - anterior >= this->velocidad) {
@@ -38,6 +40,11 @@ void Serpiente::avanzar(Comida* comida) {
                 }else {
                     this->cabeza.setY(this->cabeza.getY() + 1);
                 }
+                //actualizamos la posicion de los ojos
+                this->ojoDerecho.setX((cabeza.getX() + 0.25) / 0.15);
+                this->ojoDerecho.setY((cabeza.getY() + 0.3) / 0.15);
+                this->ojoIzquierdo.setX((cabeza.getX() - 0.25) / 0.15);
+                this->ojoIzquierdo.setY((cabeza.getY() + 0.3) / 0.15);
                 break;
             case ABAJO:
                 if (this->cabeza.getY() == -LIMITE) {
@@ -46,6 +53,11 @@ void Serpiente::avanzar(Comida* comida) {
                 else {
                     this->cabeza.setY(this->cabeza.getY() - 1);
                 }
+                //actualizamos la posicion de los ojos
+                this->ojoDerecho.setX((cabeza.getX() - 0.25) / 0.15);
+                this->ojoDerecho.setY((cabeza.getY() - 0.3) / 0.15);
+                this->ojoIzquierdo.setX((cabeza.getX() + 0.25) / 0.15);
+                this->ojoIzquierdo.setY((cabeza.getY() - 0.3) / 0.15);
                 break;
             case IZQUIERDA:
                 if (this->cabeza.getX() == -LIMITE) {
@@ -54,6 +66,11 @@ void Serpiente::avanzar(Comida* comida) {
                 else {
                     this->cabeza.setX(this->cabeza.getX() - 1);
                 }
+                //actualizamos la posicion de los ojos
+                this->ojoDerecho.setX((cabeza.getX() - 0.3) / 0.15);
+                this->ojoDerecho.setY((cabeza.getY() + 0.25) / 0.15);
+                this->ojoIzquierdo.setX((cabeza.getX() - 0.3) / 0.15);
+                this->ojoIzquierdo.setY((cabeza.getY() - 0.25) / 0.15);
                 break;
             case DERECHA:
                 if (this->cabeza.getX() == LIMITE) {
@@ -62,6 +79,11 @@ void Serpiente::avanzar(Comida* comida) {
                 else {
                     this->cabeza.setX(this->cabeza.getX() + 1);
                 }
+                //actualizamos la posicion de los ojos
+                this->ojoDerecho.setX((cabeza.getX() + 0.3) / 0.15);
+                this->ojoDerecho.setY((cabeza.getY() - 0.25) / 0.15);
+                this->ojoIzquierdo.setX((cabeza.getX() + 0.3) / 0.15);
+                this->ojoIzquierdo.setY((cabeza.getY() + 0.25) / 0.15);
                 break;
             default:
                 break;
@@ -102,6 +124,10 @@ int Serpiente::getDireccion() {
 }
 
 void Serpiente::dibujar(GLuint shader){
+    //dibujamos los ojos
+    this->ojoDerecho.dibujar(shader);
+    this->ojoIzquierdo.dibujar(shader);
+    //dibujamos la cabeza
     for (int i = 0; i < this->longitud; i++) {
         this->cuerpo[i].dibujar(shader);
     }
@@ -119,7 +145,8 @@ std::vector<Parte> Serpiente::getCuerpo(){
     return this->cuerpo;
 }
 
-void Serpiente::texturizar(GLuint textura1, GLuint textura2){
+void Serpiente::texturizar(GLuint textura1, GLuint textura2, GLuint texturaOjo){
+    //establecemos las texturas alternando entre las partes de la serpiente
     for (int i = 0; i < this->longitud;i++) {
         if (i % 2 == 0) {
             this->cuerpo[i].setTextura(textura1);
@@ -129,11 +156,16 @@ void Serpiente::texturizar(GLuint textura1, GLuint textura2){
         }
     }
     this->cabeza.setTextura(this->cuerpo[0].getTextura());
+    //ponemos las texturas de los ojos
+    this->ojoDerecho.setTextura(texturaOjo);
+    this->ojoIzquierdo.setTextura(texturaOjo);
 }
 
 void Serpiente::girar(float giro){
     int angulo = this->cabeza.getGiro() + giro;
     this->cabeza.setGiro(angulo % 360);
+    this->ojoDerecho.setGiro(angulo % 360);
+    this->ojoIzquierdo.setGiro(angulo % 360);
 }
 
 

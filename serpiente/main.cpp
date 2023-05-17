@@ -8,7 +8,7 @@
 
 #include "geometrias.h"
 #include "serpiente.h"
-#include "comida.h"
+#include "fruta.h"
 
 //transformaciones
 #include <glm/glm.hpp>
@@ -32,9 +32,9 @@ GLuint VAOCuadrado;
 GLuint VAOCubo;
 GLuint VAOEsfera;
 
-Serpiente serpiente(3, &VAOCubo, 36);
+Serpiente serpiente(3, &VAOCubo, 36, &VAOEsfera, 1080);
 
-GLuint texturaSerpiente1, texturaSerpiente2, texturaManzana, hierba1, hierba2;
+GLuint texturaSerpiente1, texturaSerpiente2, texturaManzana, hierba1, hierba2, texturaOjo;
 
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -238,13 +238,14 @@ int main() {
 	//creamos las texturas
 	cargaTextura(&texturaSerpiente1,"../texturas/serpiente_marron.jpg");
 	cargaTextura(&texturaSerpiente2, "../texturas/serpiente_amarilla.jpg");
-	cargaTextura(&texturaManzana, "../texturas/manzana.jpg");
+	cargaTextura(&texturaManzana, "../texturas/melocoton.jpg");
 	cargaTextura(&hierba1, "../texturas/hierba1.jpg");
 	cargaTextura(&hierba2, "../texturas/hierba2.jpg");
-	serpiente.texturizar(texturaSerpiente1, texturaSerpiente2);
+	cargaTextura(&texturaOjo, "../texturas/ojo.jpg");
+	serpiente.texturizar(texturaSerpiente1, texturaSerpiente2, texturaOjo);
 	// Lazo de la ventana mientras no la cierre
 	// -----------
-	Comida comida(ESCALA/2.0, 0, &VAOEsfera, texturaManzana, 1080, 0, serpiente);
+	Fruta comida(ESCALA/2.0, 0, &VAOEsfera, texturaManzana, 1080, 0, serpiente);
 	while (!glfwWindowShouldClose(window)){
 		// input
 		// -----

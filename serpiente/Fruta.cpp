@@ -1,8 +1,8 @@
 #include <ctime>
-#include "comida.h"
+#include "fruta.h"
 #include "serpiente.h"
 
-Comida::Comida(float escalado, float giro, GLuint* geometria, GLuint textura, GLuint n, int tipo, Serpiente s){
+Fruta::Fruta(float escalado, float giro, GLuint* geometria, GLuint textura, GLuint n, int tipo, Serpiente s){
     this->z = 1 * escalado;
     this->escalado = escalado;
     this->geometria = geometria;
@@ -14,7 +14,7 @@ Comida::Comida(float escalado, float giro, GLuint* geometria, GLuint textura, GL
     colocar(&s);
 }
 
-void Comida::colocar(Serpiente *s) {
+void Fruta::colocar(Serpiente *s) {
     float x, y, posicionValida;
     do {
         //establecemos la posicion como valida a priori
@@ -35,7 +35,7 @@ void Comida::colocar(Serpiente *s) {
     this->y = y;
 }
 
-void Comida::dibujar(GLuint shader) {
+void Fruta::dibujar(GLuint shader) {
     unsigned int modelLoc = glGetUniformLocation(shader, "model");
     //matriz de transformacion
     glm::mat4 model = glm::mat4();
