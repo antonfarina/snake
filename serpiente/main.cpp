@@ -91,7 +91,7 @@ void iluminacion(Fruta comida) {
 	glUniform3f(lightPosLoc, serpiente.getCabeza().getX(), serpiente.getCabeza().getY(), serpiente.getCabeza().getZ() + 5);
 
 	unsigned int luzDirLoc = glGetUniformLocation(shaderProgram, "luzDir");
-	glUniform3f(luzDirLoc, comida.getX()-serpiente.getCabeza().getX(), comida.getY()-serpiente.getCabeza().getY(), comida.getZ()-serpiente.getCabeza().getZ() - 10);
+	glUniform3f(luzDirLoc, comida.getX()-serpiente.getCabeza().getX(), comida.getY()-serpiente.getCabeza().getY(), 1);
 	//luz especular 
 	//unsigned int viewPosLoc = glGetUniformLocation(shaderProgram, "viewPos");
 	//glUniform3f(viewPosLoc, posicionObservador.getX(), posicionObservador.getY(), posicionObservador.getZ());

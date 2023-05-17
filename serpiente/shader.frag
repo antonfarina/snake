@@ -15,13 +15,14 @@ uniform vec3 luzDir;
 uniform sampler2D texture1;
 
 void main(){
-	vec3 luzDir = vec3(-0,0,-1);
+	//vec3 luzDir = vec3(-0,0,-1);
 	float ambientI = 1.5f;
 	vec3 ambient = ambientI * lightColor;
 	vec3 ld = normalize(-lightPos);
-	ld = luzDir;
+	ld = normalize(-luzDir);
 	vec3 fd = normalize(vec3((FragPos - lightPos)));
-	if(acos(dot(fd,ld)) < radians(20)){
+
+	if(acos(dot(fd,ld)) < radians(10)){
 		//Difusa
 		vec3 norm = normalize(Normal);
 		vec3 lightDir = normalize(lightPos - FragPos);
