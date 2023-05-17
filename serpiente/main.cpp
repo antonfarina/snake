@@ -38,8 +38,6 @@ Serpiente serpiente(3, &VAOCubo, 36, &VAOEsfera, 1080);
 GLuint texturaSerpiente1, texturaSerpiente2, hierba1, hierba2, texturaOjo;
 std::unordered_map<unsigned int, GLuint> texturasFruta;
 
-
-
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void processInput(GLFWwindow* window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -81,6 +79,22 @@ void camaraCabeza() {
 	projection = glm::perspective(45.0f, (float)ANCHO / (float)ALTO, 0.01f, 10.0f);
 	unsigned int projectionLoc = glad_glGetUniformLocation(shaderProgram, "projection");
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+}
+
+void iluminacion(Fruta comida) {
+	//el color de la luz ambiente 
+	unsigned int lightLoc = glGetUniformLocation(shaderProgram, "lightColor");
+	//luz blanca
+	glUniform3f(lightLoc, 1.0f, 1.0f, 1.0f);
+	//luz difusa 
+	unsigned int lightPosLoc = glGetUniformLocation(shaderProgram, "lightPos");
+	glUniform3f(lightPosLoc, serpiente.getCabeza().getX(), serpiente.getCabeza().getY(), serpiente.getCabeza().getZ() + 5);
+
+	unsigned int luzDirLoc = glGetUniformLocation(shaderProgram, "luzDir");
+	glUniform3f(luzDirLoc, comida.getX()-serpiente.getCabeza().getX(), comida.getY()-serpiente.getCabeza().getY(), comida.getZ()-serpiente.getCabeza().getZ() - 10);
+	//luz especular 
+	//unsigned int viewPosLoc = glGetUniformLocation(shaderProgram, "viewPos");
+	//glUniform3f(viewPosLoc, posicionObservador.getX(), posicionObservador.getY(), posicionObservador.getZ());
 }
 
 
@@ -242,8 +256,9 @@ int main() {
 	//creamos las texturas
 	cargaTextura(&texturaSerpiente1,"../texturas/serpiente_marron.jpg");
 	cargaTextura(&texturaSerpiente2, "../texturas/serpiente_amarilla.jpg");
+	//texturas de las frutas
 	GLuint texturaFruta;
-	cargaTextura(&texturaFruta, "../texturas/manzana.jpg");
+	cargaTextura(&texturaFruta, "../texturas/piña.jpg");
 	texturasFruta.insert({ 0, texturaFruta });
 	cargaTextura(&texturaFruta, "../texturas/sandia.jpg");
 	texturasFruta.insert({ 1, texturaFruta });
@@ -251,6 +266,10 @@ int main() {
 	texturasFruta.insert({ 2, texturaFruta });
 	cargaTextura(&texturaFruta, "../texturas/melocoton.jpg");
 	texturasFruta.insert({ 3, texturaFruta });
+	cargaTextura(&texturaFruta, "../texturas/coco.jpg");
+	texturasFruta.insert({ 4, texturaFruta });
+	cargaTextura(&texturaFruta, "../texturas/manzana.jpg");
+	texturasFruta.insert({ 5, texturaFruta });
 	cargaTextura(&hierba1, "../texturas/hierba1.jpg");
 	cargaTextura(&hierba2, "../texturas/hierba2.jpg");
 	cargaTextura(&texturaOjo, "../texturas/ojo.jpg");
@@ -271,6 +290,7 @@ int main() {
 
 		serpiente.dibujar(shaderProgram);
 		comida.dibujar(shaderProgram);
+		iluminacion(comida);
 		if(comenzar)serpiente.avanzar(&comida);
 		glBindVertexArray(0);
 

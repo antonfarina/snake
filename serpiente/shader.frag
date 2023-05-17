@@ -10,15 +10,50 @@ out vec4 FragColor;
 uniform vec3 viewPos;
 uniform vec3 lightPos;
 uniform vec3 lightColor;
-
+uniform vec3 luzDir;
 
 uniform sampler2D texture1;
 
 void main(){
-	if(texture2D(texture1, TexCoord) == vec4(0.0,0.0,0.0,1.0)){
-		FragColor=vec4(objectColor, 1.0f);
-	}else{
-		FragColor=vec4(1.0, 1.0, 1.0, 1.0f) * texture2D(texture1, TexCoord);
+	vec3 luzDir = vec3(-0,0,-1);
+	float ambientI = 1.5f;
+	vec3 ambient = ambientI * lightColor;
+	vec3 ld = normalize(-lightPos);
+	ld = luzDir;
+	vec3 fd = normalize(vec3((FragPos - lightPos)));
+	if(acos(dot(fd,ld)) < radians(20)){
+		//Difusa
+		vec3 norm = normalize(Normal);
+		vec3 lightDir = normalize(lightPos - FragPos);
+		float diff = max(dot(norm, lightDir), 0.0);
+		vec3 diffuse = 0.7 * diff * lightColor;
+
+		//Especular
+		float specularStrength = 1.0;
+		vec3 viewDir = normalize(viewPos - FragPos);
+		vec3 reflectDir = reflect(-lightDir, norm);
+		float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128);
+		vec3 specular = specularStrength * spec * lightColor;
+
+		//comprobamos si el objeto tiene textura
+		if(texture2D(texture1, TexCoord)==vec4(0.0,0.0,0.0,1.0)){
+			//si no tiene lo pintamos de su color
+			vec3 result = ((ambient + diffuse + specular) * objectColor)/2;
+			FragColor = vec4(result, 1.0);
+		}else{
+			vec3 result = ((ambient + diffuse + specular) * vec3(1.0, 1.0, 1.0))/2;
+			FragColor = vec4(result, 1.0) * texture2D(texture1, TexCoord);
+		}
+	} else {
+		//comprobamos si el objeto tiene textura
+		if(texture2D(texture1, TexCoord)==vec4(0.0,0.0,0.0,1.0)){
+			//si no tiene lo pintamos de su color
+			vec3 result = ((ambient) * objectColor)/2;
+			FragColor = vec4(result, 1.0);
+		}else{
+			vec3 result = ((ambient) * vec3(1.0, 1.0, 1.0))/2;
+			FragColor = vec4(result, 1.0) * texture2D(texture1, TexCoord);
+		}
 	}
-	
+
 }
