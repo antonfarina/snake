@@ -81,7 +81,6 @@ void camaraCabeza() {
 }
 
 
-
 //funcion que crea el VAO en la variable VAO a partir del array de vertices
 void creaVAO(float* vertices, unsigned int tam, GLuint* VAO, int color) {
 	unsigned int VBO, repeticion = 8;
@@ -194,6 +193,8 @@ void openGlInit() {
 	glEnable(GL_DEPTH_TEST); //z-buffer
 	//glEnable(GL_CULL_FACE); //ocultacion caras back
 	glCullFace(GL_BACK);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 }
 
