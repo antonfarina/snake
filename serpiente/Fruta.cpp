@@ -2,13 +2,12 @@
 #include "fruta.h"
 #include "serpiente.h"
 
-Fruta::Fruta(float escalado, float giro, GLuint* geometria, GLuint textura, GLuint n, int tipo, Serpiente s){
+Fruta::Fruta(float escalado, float giro, GLuint* geometria, std::unordered_map<unsigned int, GLuint> texturas, GLuint n, Serpiente s){
     this->z = 1 * escalado;
     this->escalado = escalado;
     this->geometria = geometria;
-    this->textura = textura;
+    this->texturas = texturas;
     this->nTriangulos = n;
-    this->tipo = tipo;
     this->giro = giro;
     srand(std::time(nullptr));
     colocar(&s);
@@ -33,10 +32,12 @@ void Fruta::colocar(Serpiente *s) {
     //establecemos la posicion a la posicion encontrada
     this->x = x;
     this->y = y;
+    this->textura = this->texturas[rand() % this->texturas.size()];
 }
 
 void Fruta::dibujar(GLuint shader) {
     unsigned int modelLoc = glGetUniformLocation(shader, "model");
+    unsigned int textura;
     //matriz de transformacion
     glm::mat4 model = glm::mat4();
     //trasladamos

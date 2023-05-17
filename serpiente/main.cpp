@@ -4,6 +4,7 @@
 #include <iostream>
 #include <lecturaShader.h>
 #include <string>
+#include <unordered_map>
 
 
 #include "geometrias.h"
@@ -21,7 +22,7 @@
 
 
 //ancho y alto de la ventana
-GLuint ANCHO = 800;
+GLuint ANCHO = 1200;
 GLuint ALTO = 800;
 
 int comenzar = 0;
@@ -34,7 +35,9 @@ GLuint VAOEsfera;
 
 Serpiente serpiente(3, &VAOCubo, 36, &VAOEsfera, 1080);
 
-GLuint texturaSerpiente1, texturaSerpiente2, texturaManzana, hierba1, hierba2, texturaOjo;
+GLuint texturaSerpiente1, texturaSerpiente2, hierba1, hierba2, texturaOjo;
+std::unordered_map<unsigned int, GLuint> texturasFruta;
+
 
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -238,14 +241,22 @@ int main() {
 	//creamos las texturas
 	cargaTextura(&texturaSerpiente1,"../texturas/serpiente_marron.jpg");
 	cargaTextura(&texturaSerpiente2, "../texturas/serpiente_amarilla.jpg");
-	cargaTextura(&texturaManzana, "../texturas/melocoton.jpg");
+	GLuint texturaFruta;
+	cargaTextura(&texturaFruta, "../texturas/manzana.jpg");
+	texturasFruta.insert({ 0, texturaFruta });
+	cargaTextura(&texturaFruta, "../texturas/sandia.jpg");
+	texturasFruta.insert({ 1, texturaFruta });
+	cargaTextura(&texturaFruta, "../texturas/naranja.jpg");
+	texturasFruta.insert({ 2, texturaFruta });
+	cargaTextura(&texturaFruta, "../texturas/melocoton.jpg");
+	texturasFruta.insert({ 3, texturaFruta });
 	cargaTextura(&hierba1, "../texturas/hierba1.jpg");
 	cargaTextura(&hierba2, "../texturas/hierba2.jpg");
 	cargaTextura(&texturaOjo, "../texturas/ojo.jpg");
 	serpiente.texturizar(texturaSerpiente1, texturaSerpiente2, texturaOjo);
 	// Lazo de la ventana mientras no la cierre
 	// -----------
-	Fruta comida(ESCALA/2.0, 0, &VAOEsfera, texturaManzana, 1080, 0, serpiente);
+	Fruta comida(ESCALA/2.0, 0, &VAOEsfera, texturasFruta, 1080, serpiente);
 	while (!glfwWindowShouldClose(window)){
 		// input
 		// -----
