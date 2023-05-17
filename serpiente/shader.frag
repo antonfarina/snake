@@ -15,25 +15,23 @@ uniform vec3 luzDir;
 uniform sampler2D texture1;
 
 void main(){
-	//vec3 luzDir = vec3(-0,0,-1);
-	float ambientI = 1.5f;
+	float ambientI = 2.5f;
 	vec3 ambient = ambientI * lightColor;
-	vec3 ld = normalize(-lightPos);
-	ld = normalize(-luzDir);
-	vec3 fd = normalize(vec3((FragPos - lightPos)));
+	vec3 ld = normalize(-luzDir);
+	vec3 fd = normalize(vec3((-FragPos + lightPos)));
 
-	if(acos(dot(fd,ld)) < radians(10)){
+	if(acos(dot(fd,ld)) < radians(35)){
 		//Difusa
 		vec3 norm = normalize(Normal);
 		vec3 lightDir = normalize(lightPos - FragPos);
 		float diff = max(dot(norm, lightDir), 0.0);
-		vec3 diffuse = 0.7 * diff * lightColor;
+		vec3 diffuse = diff * lightColor;
 
 		//Especular
-		float specularStrength = 1.0;
+		float specularStrength = 0.5;
 		vec3 viewDir = normalize(viewPos - FragPos);
 		vec3 reflectDir = reflect(-lightDir, norm);
-		float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128);
+		float spec = pow(max(dot(viewDir, reflectDir), 0.0), 1);
 		vec3 specular = specularStrength * spec * lightColor;
 
 		//comprobamos si el objeto tiene textura
@@ -56,5 +54,4 @@ void main(){
 			FragColor = vec4(result, 1.0) * texture2D(texture1, TexCoord);
 		}
 	}
-
 }

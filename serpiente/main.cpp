@@ -51,14 +51,14 @@ void camaraAlejada() {
 	//Cargamos la identidad
 	view = glm::mat4();
 	//establecemos la posicion del observador
-	view = glm::lookAt(glm::vec3(0, 0, 20 * ESCALA), glm::vec3(.0f, .0f, .0f), glm::vec3(.0f,1, .0f));
+	view = glm::lookAt(glm::vec3(0, 0, 20 * ESCALA), glm::vec3(.0f, .0f, .0f), glm::vec3(.0f, 1, .0f));
 	unsigned int viewLoc = glad_glGetUniformLocation(shaderProgram, "view");
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	//Matriz de proyección
 	glm::mat4 projection;
 	//Cargamos la identidad
 	projection = glm::mat4();
-	projection = glm::perspective(45.0f,(float) ANCHO/ (float) ALTO, 0.01f, 21.0f);
+	projection = glm::perspective(45.0f, (float) ANCHO/ (float) ALTO, 0.01f, 21.0f);
 	unsigned int projectionLoc = glad_glGetUniformLocation(shaderProgram, "projection");
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 }
@@ -89,13 +89,26 @@ void iluminacion(Fruta comida) {
 	glUniform3f(lightLoc, 1.0f, 1.0f, 1.0f);
 	//luz difusa 
 	unsigned int lightPosLoc = glGetUniformLocation(shaderProgram, "lightPos");
-	glUniform3f(lightPosLoc, serpiente.getCabeza().getX(), serpiente.getCabeza().getY(), serpiente.getCabeza().getZ() + 5);
+	glUniform3f(lightPosLoc, serpiente.getCabeza().getX(), serpiente.getCabeza().getY(), 0.5);
 
 	unsigned int luzDirLoc = glGetUniformLocation(shaderProgram, "luzDir");
-	glUniform3f(luzDirLoc, comida.getX()-serpiente.getCabeza().getX(), comida.getY()-serpiente.getCabeza().getY(), 1);
+	switch (serpiente.getDireccion()) {
+	case ARRIBA:
+		glUniform3f(luzDirLoc, 0,1,0);
+		break;
+	case ABAJO:
+		glUniform3f(luzDirLoc, 0, -1, 0);
+		break;
+	case IZQUIERDA:
+		glUniform3f(luzDirLoc, -1, 0, 0);
+		break;
+	case DERECHA:
+		glUniform3f(luzDirLoc, 1, 0, 0);
+		break;
+	}	
 	//luz especular 
-	//unsigned int viewPosLoc = glGetUniformLocation(shaderProgram, "viewPos");
-	//glUniform3f(viewPosLoc, posicionObservador.getX(), posicionObservador.getY(), posicionObservador.getZ());
+	unsigned int viewPosLoc = glGetUniformLocation(shaderProgram, "viewPos");
+	glUniform3f(viewPosLoc, 0, 0, 20);
 }
 
 
@@ -219,6 +232,7 @@ void dibujarFin() {
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
+
 void openGlInit() {
 	glClearDepth(1.0f); //Valor z-buffer
 	glClearColor(0.0f, 0.0f, 0.1f, 1.0f); //valor limpieza buffer color
@@ -231,7 +245,6 @@ void openGlInit() {
 }
 
 int main() {
-	
 	//glfw: initalize and configure
 	//-----------------------------
 	glfwInit();
@@ -301,16 +314,16 @@ int main() {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);//Borro el buffer de la ventana
 		glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
 		camaraAlejada();
+		iluminacion(comida);
 		if (!perder) {
 			//Dibujo del suelo
 			dibujaSuelo(shaderProgram);
-
 			serpiente.dibujar(shaderProgram);
 			comida.dibujar(shaderProgram);
 			if (comenzar) {
 				if (!serpiente.avanzar(&comida)) {
-					perder++;
-					comenzar--;
+					perder = ~perder;
+					comenzar = ~comenzar;
 				}
 			}
 		}
