@@ -86,7 +86,7 @@ void iluminacion(Fruta comida) {
 	//el color de la luz ambiente 
 	unsigned int lightLoc = glGetUniformLocation(shaderProgram, "lightColor");
 	//luz blanca
-	glUniform3f(lightLoc, 1.0f, 1.0f, 1.0f);
+	glUniform3f(lightLoc, 0.5f, 0.5f, 1.0f);
 	//luz difusa 
 	unsigned int lightPosLoc = glGetUniformLocation(shaderProgram, "lightPos");
 	glUniform3f(lightPosLoc, serpiente.getCabeza().getX(), serpiente.getCabeza().getY(), 0.5);
@@ -187,11 +187,12 @@ void dibujaSuelo(GLuint shaderProgram) {
 }
 
 
-void cargaTextura(unsigned int* textura, const char* ruta) {
+GLuint cargaTextura(const char* ruta) {
+	GLuint textura;
 	int width, height, nrChannels, formato;
 	//geneneramos la textura
-	glGenTextures(1, textura);
-	glBindTexture(GL_TEXTURE_2D, *textura);
+	glGenTextures(1, &textura);
+	glBindTexture(GL_TEXTURE_2D, textura);
 	//parametros wrap
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -217,6 +218,7 @@ void cargaTextura(unsigned int* textura, const char* ruta) {
 		printf("Fallo en la carga de la textura %s\n", imagen);
 	}
 	stbi_image_free(imagen);
+	return textura;
 }
 
 void dibujarFin() {
@@ -282,26 +284,26 @@ int main() {
 	creaVAO(vertices_cubo, sizeof(vertices_cubo), &VAOCubo, 1);
 
 	//creamos las texturas
-	cargaTextura(&texturaSerpiente1,"../texturas/serpiente_marron.jpg");
-	cargaTextura(&texturaSerpiente2, "../texturas/serpiente_amarilla.jpg");
+	texturaSerpiente1 = cargaTextura("../texturas/serpiente_marron.jpg");
+	texturaSerpiente2 = cargaTextura("../texturas/serpiente_amarilla.jpg");
 	//texturas de las frutas
 	GLuint texturaFruta;
-	cargaTextura(&texturaFruta, "../texturas/piña.jpg");
+	texturaFruta = cargaTextura("../texturas/piña.jpg");
 	texturasFruta.insert({ 0, texturaFruta });
-	cargaTextura(&texturaFruta, "../texturas/sandia.jpg");
+	texturaFruta = cargaTextura("../texturas/sandia.jpg");
 	texturasFruta.insert({ 1, texturaFruta });
-	cargaTextura(&texturaFruta, "../texturas/naranja.jpg");
+	texturaFruta = cargaTextura("../texturas/naranja.jpg");
 	texturasFruta.insert({ 2, texturaFruta });
-	cargaTextura(&texturaFruta, "../texturas/melocoton.jpg");
+	texturaFruta = cargaTextura("../texturas/melocoton.jpg");
 	texturasFruta.insert({ 3, texturaFruta });
-	cargaTextura(&texturaFruta, "../texturas/coco.jpg");
+	texturaFruta = cargaTextura("../texturas/coco.jpg");
 	texturasFruta.insert({ 4, texturaFruta });
-	cargaTextura(&texturaFruta, "../texturas/manzana.jpg");
+	texturaFruta = cargaTextura("../texturas/manzana.jpg");
 	texturasFruta.insert({ 5, texturaFruta });
-	cargaTextura(&hierba1, "../texturas/hierba1.jpg");
-	cargaTextura(&hierba2, "../texturas/hierba2.jpg");
-	cargaTextura(&texturaOjo, "../texturas/ojo.jpg");
-	cargaTextura(&texturaPerder, "../texturas/perder.jpg");
+	hierba1 = cargaTextura("../texturas/hierba1.jpg");
+	hierba2 = cargaTextura("../texturas/hierba2.jpg");
+	texturaOjo = cargaTextura("../texturas/ojo.jpg");
+	texturaPerder = cargaTextura("../texturas/perder.jpg");
 	serpiente.texturizar(texturaSerpiente1, texturaSerpiente2, texturaOjo);
 	// Lazo de la ventana mientras no la cierre
 	// -----------
@@ -326,8 +328,7 @@ int main() {
 					comenzar = ~comenzar;
 				}
 			}
-		}
-		else {
+		}else {
 			dibujarFin();
 		}
 		
@@ -357,7 +358,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	switch (key){
 		//movimiento de la serpiente
 		case 265://flecha arriba
-			if (serpiente.getDireccion() != ABAJO && action == GLFW_RELEASE) {
+			if (comenzar && serpiente.getDireccion() != ABAJO && action == GLFW_RELEASE) {
 				if (serpiente.getDireccion() == IZQUIERDA) {
 					serpiente.girar(-90);
 				}
@@ -368,7 +369,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			}
 			break;
 		case 264://flecha abajo
-			if (serpiente.getDireccion() != ARRIBA && action == GLFW_RELEASE) {
+			if (comenzar && serpiente.getDireccion() != ARRIBA && action == GLFW_RELEASE) {
 				if (serpiente.getDireccion() == IZQUIERDA) {
 					serpiente.girar(90);
 				}
@@ -379,7 +380,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			}
 			break;
 		case 262://flecha derecha
-			if (serpiente.getDireccion() != IZQUIERDA && action == GLFW_RELEASE) {
+			if (comenzar && serpiente.getDireccion() != IZQUIERDA && action == GLFW_RELEASE) {
 				if (serpiente.getDireccion() == ARRIBA) {
 					serpiente.girar(-90);
 				}
@@ -390,7 +391,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			}
 			break;
 		case 263://flecha izquierda
-			if (serpiente.getDireccion() != DERECHA && action == GLFW_RELEASE) {
+			if (comenzar && serpiente.getDireccion() != DERECHA && action == GLFW_RELEASE) {
 				if (serpiente.getDireccion() == ARRIBA) {
 					serpiente.girar(90);
 				}

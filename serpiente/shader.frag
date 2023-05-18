@@ -15,7 +15,7 @@ uniform vec3 luzDir;
 uniform sampler2D texture1;
 
 void main(){
-	float ambientI = 2.5f;
+	float ambientI = 3;
 	vec3 ambient = ambientI * lightColor;
 	vec3 ld = normalize(-luzDir);
 	vec3 fd = normalize(vec3((-FragPos + lightPos)));
@@ -25,7 +25,7 @@ void main(){
 		vec3 norm = normalize(Normal);
 		vec3 lightDir = normalize(lightPos - FragPos);
 		float diff = max(dot(norm, lightDir), 0.0);
-		vec3 diffuse = diff * lightColor;
+		vec3 diffuse = 3 * diff * vec3(0.7f, 0.7f, .3f);
 
 		//Especular
 		float specularStrength = 0.5;
