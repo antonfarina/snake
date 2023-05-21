@@ -90,22 +90,8 @@ void iluminacion(Fruta comida) {
 	//luz difusa 
 	unsigned int lightPosLoc = glGetUniformLocation(shaderProgram, "lightPos");
 	glUniform3f(lightPosLoc, serpiente.getCabeza().getX(), serpiente.getCabeza().getY(), 0.5);
-
 	unsigned int luzDirLoc = glGetUniformLocation(shaderProgram, "luzDir");
-	switch (serpiente.getDireccion()) {
-	case ARRIBA:
-		glUniform3f(luzDirLoc, 0,1,0);
-		break;
-	case ABAJO:
-		glUniform3f(luzDirLoc, 0, -1, 0);
-		break;
-	case IZQUIERDA:
-		glUniform3f(luzDirLoc, -1, 0, 0);
-		break;
-	case DERECHA:
-		glUniform3f(luzDirLoc, 1, 0, 0);
-		break;
-	}	
+	glUniform3f(luzDirLoc, glm::cos(glm::radians((float)serpiente.getCabeza().getGiro())), glm::sin(glm::radians((float)serpiente.getCabeza().getGiro())), 0);
 	//luz especular 
 	unsigned int viewPosLoc = glGetUniformLocation(shaderProgram, "viewPos");
 	glUniform3f(viewPosLoc, 0, 0, 20);

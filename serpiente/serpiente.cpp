@@ -13,15 +13,15 @@ Serpiente::Serpiente(int longitud, GLuint* VAOCubo, int nTriangulosCubo, GLuint*
         this->longitud = LIMITE;
     }
     
-    this->cabeza = Parte(0, 0, ESCALA / 2.0, ESCALA, 0, VAOCubo, 0, nTriangulosCubo);
+    this->cabeza = Parte(0, 0, ESCALA / 2.0, ESCALA, 180, VAOCubo, 0, nTriangulosCubo);
     //creamos los ojos
-    this->ojoDerecho = Parte(-0.3/0.15, 0.25/0.15, 1/0.15, 0.15, 0, VAOEsfera, 0, nTriangulosEsfera);
-    this->ojoIzquierdo = Parte(-0.3/0.15, -0.25/0.15, 1/0.15, 0.15, 0, VAOEsfera, 0, nTriangulosEsfera);
+    this->ojoDerecho = Parte(-0.3/0.15, 0.25/0.15, 1/0.15, 0.15, 180, VAOEsfera, 0, nTriangulosEsfera);
+    this->ojoIzquierdo = Parte(-0.3/0.15, -0.25/0.15, 1/0.15, 0.15, 180, VAOEsfera, 0, nTriangulosEsfera);
     this->direccion = IZQUIERDA;
     //inicializamos las posiciones donde se encuentra el cuerpo de la serpiente
     this->cuerpo.push_back(this->cabeza);
     for (int i = 1; i < longitud; i++) {
-        this->cuerpo.push_back(Parte(i, 0, ESCALA/2.0, ESCALA, 0, VAOCubo, 0, nTriangulosCubo));
+        this->cuerpo.push_back(Parte(i, 0, ESCALA/2.0, ESCALA, 180, VAOCubo, 0, nTriangulosCubo));
     }
     this->anterior = 0;
     this->velocidad = VELOCIDAD;
