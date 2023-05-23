@@ -22,12 +22,13 @@
 
 
 //ancho y alto de la ventana
-GLuint ANCHO = 1200;
+GLuint ANCHO = 1600;
 GLuint ALTO = 800;
 
-unsigned int comenzar = 0;
-unsigned int perder = 0;
+GLuint comenzar = 0;
+GLuint perder = 0;
 GLuint shaderProgram;
+GLuint camara = 0;
 
 //VAOS para crear los objetos
 GLuint VAOCuadrado;
@@ -45,7 +46,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 extern GLuint setShaders(const char* nVertix, const char* nFrag);
 
 void camaraAlejada() {
-	glViewport(0, 0, ANCHO, ALTO);
+	glViewport(400, 0, ANCHO, ALTO);
 	//Matriz de vista
 	glm::mat4 view;
 	//Cargamos la identidad
@@ -64,37 +65,39 @@ void camaraAlejada() {
 }
 
 void camaraCabeza() {
-	glViewport(0, 0, ANCHO, ALTO);
+	glViewport(400, 0, ANCHO, ALTO);
 	//Matriz de vista
 	glm::mat4 view;
 	//Cargamos la identidad
 	view = glm::mat4();
 	//establecemos la posicion del observador
-	view = glm::lookAt(glm::vec3(serpiente.getCuerpo()[1].getX()-1, serpiente.getCuerpo()[1].getY()-1, 1), glm::vec3(serpiente.getCabeza().getX(), serpiente.getCabeza().getY(), 1), glm::vec3(.0f, 0, 1.0f));
+	glm::vec3 observador = glm::vec3(serpiente.getCabeza().getX() - 8*glm::cos(glm::radians((float)serpiente.getCabeza().getGiro())), serpiente.getCabeza().getY() - 8*glm::sin(glm::radians((float)serpiente.getCabeza().getGiro())), 8);
+	glm::vec3 vision = glm::vec3(serpiente.getCabeza().getX() + glm::cos(glm::radians((float)serpiente.getCabeza().getGiro())), serpiente.getCabeza().getY() + glm::sin(glm::radians((float)serpiente.getCabeza().getGiro())), 0);
+	view = glm::lookAt(observador,vision, glm::vec3(.0f, 0, 1.0f));
 	unsigned int viewLoc = glad_glGetUniformLocation(shaderProgram, "view");
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	//Matriz de proyección
 	glm::mat4 projection;
 	//Cargamos la identidad
 	projection = glm::mat4();
-	projection = glm::perspective(45.0f, (float)ANCHO / (float)ALTO, 0.01f, 10.0f);
+	projection = glm::perspective(45.0f, (float)ANCHO / (float)ALTO, 0.01f, 30.0f);
 	unsigned int projectionLoc = glad_glGetUniformLocation(shaderProgram, "projection");
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 }
 
 void iluminacion(Fruta comida) {
 	//el color de la luz ambiente 
-	unsigned int lightLoc = glGetUniformLocation(shaderProgram, "lightColor");
+	unsigned int lightLoc = glGetUniformLocation(shaderProgram, "colorLuz");
 	//luz blanca
 	glUniform3f(lightLoc, 0.5f, 0.5f, 1.0f);
-	//luz difusa 
-	unsigned int lightPosLoc = glGetUniformLocation(shaderProgram, "lightPos");
+	//luz difusa en la cabeza 
+	unsigned int lightPosLoc = glGetUniformLocation(shaderProgram, "posicionLuzSerpiente");
 	glUniform3f(lightPosLoc, serpiente.getCabeza().getX(), serpiente.getCabeza().getY(), 0.5);
-	unsigned int luzDirLoc = glGetUniformLocation(shaderProgram, "luzDir");
+	unsigned int luzDirLoc = glGetUniformLocation(shaderProgram, "direccionLuzSerpiente");
 	glUniform3f(luzDirLoc, glm::cos(glm::radians((float)serpiente.getCabeza().getGiro())), glm::sin(glm::radians((float)serpiente.getCabeza().getGiro())), 0);
-	//luz especular 
-	unsigned int viewPosLoc = glGetUniformLocation(shaderProgram, "viewPos");
-	glUniform3f(viewPosLoc, 0, 0, 20);
+	//luz difusa en la fruta
+	lightPosLoc = glGetUniformLocation(shaderProgram, "posicionLuzFruta");
+	glUniform3f(lightPosLoc, comida.getX(), comida.getY(), 8);
 }
 
 
@@ -301,7 +304,16 @@ int main() {
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);//Borro el buffer de la ventana
 		glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
-		camaraAlejada();
+		switch (camara)	{
+		case 0:
+			camaraAlejada();
+			break;
+		case 1: 
+			camaraCabeza();
+			break;
+		default:
+			break;
+		}
 		iluminacion(comida);
 		if (!perder) {
 			//Dibujo del suelo
@@ -315,6 +327,7 @@ int main() {
 				}
 			}
 		}else {
+			camaraAlejada();
 			dibujarFin();
 		}
 		
@@ -344,56 +357,111 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	switch (key){
 		//movimiento de la serpiente
 		case 265://flecha arriba
-			if (comenzar && serpiente.getDireccion() != ABAJO && action == GLFW_RELEASE) {
-				if (serpiente.getDireccion() == IZQUIERDA) {
-					serpiente.girar(-90);
+			if (camara == 0) {
+				if (comenzar && action == GLFW_RELEASE) {
+					if (serpiente.getDireccion() == IZQUIERDA) {
+						serpiente.girar(-90);
+					}
+					else {
+						serpiente.girar(90);
+					}
+					serpiente.setDireccion(ARRIBA);
 				}
-				else {
-					serpiente.girar(90);
-				}
-				serpiente.setDireccion(ARRIBA);
 			}
 			break;
 		case 264://flecha abajo
-			if (comenzar && serpiente.getDireccion() != ARRIBA && action == GLFW_RELEASE) {
-				if (serpiente.getDireccion() == IZQUIERDA) {
-					serpiente.girar(90);
+			if (camara == 0) {
+				if (comenzar && serpiente.getDireccion() != ARRIBA && action == GLFW_RELEASE) {
+					if (serpiente.getDireccion() == IZQUIERDA) {
+						serpiente.girar(90);
+					}
+					else {
+						serpiente.girar(-90);
+					}
+					serpiente.setDireccion(ABAJO);
 				}
-				else {
-					serpiente.girar(-90);
-				}
-				serpiente.setDireccion(ABAJO);
-			}
+			}			
 			break;
 		case 262://flecha derecha
-			if (comenzar && serpiente.getDireccion() != IZQUIERDA && action == GLFW_RELEASE) {
-				if (serpiente.getDireccion() == ARRIBA) {
+			if (camara == 0) {
+				if (comenzar && serpiente.getDireccion() != IZQUIERDA && action == GLFW_RELEASE) {
+					if (serpiente.getDireccion() == ARRIBA) {
+						serpiente.girar(-90);
+					}
+					else {
+						serpiente.girar(90);
+					}
+					serpiente.setDireccion(DERECHA);
+				}
+			}else {
+				if (comenzar && action == GLFW_RELEASE) {
 					serpiente.girar(-90);
+					switch (serpiente.getDireccion()) {
+						case ARRIBA:
+							serpiente.setDireccion(DERECHA);
+							break;
+						case ABAJO:
+							serpiente.setDireccion(IZQUIERDA);
+							break;
+						case IZQUIERDA:
+							serpiente.setDireccion(ARRIBA);
+							break;
+						case DERECHA:
+							serpiente.setDireccion(ABAJO);
+							break;
+					}
 				}
-				else {
-					serpiente.girar(90);
-				}
-				serpiente.setDireccion(DERECHA);
 			}
+			
 			break;
 		case 263://flecha izquierda
-			if (comenzar && serpiente.getDireccion() != DERECHA && action == GLFW_RELEASE) {
-				if (serpiente.getDireccion() == ARRIBA) {
+			if (camara == 0) {
+				if (comenzar && serpiente.getDireccion() != IZQUIERDA && action == GLFW_RELEASE) {
+					if (serpiente.getDireccion() == ARRIBA) {
+						serpiente.girar(90);
+					}
+					else {
+						serpiente.girar(-90);
+					}
+					serpiente.setDireccion(IZQUIERDA);
+				}
+			}
+			else {
+				if (comenzar && action == GLFW_RELEASE) {
 					serpiente.girar(90);
+					switch (serpiente.getDireccion()) {
+					case ARRIBA:
+						serpiente.setDireccion(IZQUIERDA);
+						break;
+					case ABAJO:
+						serpiente.setDireccion(DERECHA);
+						break;
+					case IZQUIERDA:
+						serpiente.setDireccion(ABAJO);
+						break;
+					case DERECHA:
+						serpiente.setDireccion(ARRIBA);
+						break;
+					}
 				}
-				else {
-					serpiente.girar(-90);
-				}
-				serpiente.setDireccion(IZQUIERDA);
 			}
 		break;
 		//dandole al espacio se empieza el juego
 		case 32:
 			comenzar = 1;
+			break;
+			//numero 0 camara alejada
+		case 48:
+			camara=0;
+			break;
+			//numero 1 camara en la cabeza
+		case 49:
+			camara = 1;
+			break;
 		default:
 			break;
-			
 	}
+	printf("%d\n", key);
 }
 
 //funcion de reescalado
