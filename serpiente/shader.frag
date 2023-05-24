@@ -7,43 +7,44 @@ in vec3 objectColor;
 
 out vec4 FragColor;
 
-uniform vec3 posicionLuzSerpiente;
 uniform vec3 colorLuz;
+uniform vec3 posicionLuzSerpiente;
 uniform vec3 direccionLuzSerpiente;
+uniform vec3 posicionLuzFruta;
 
 uniform sampler2D texture1;
 
 void main(){
-	float ambientI = 3;
-	vec3 ambient = ambientI * colorLuz;
+	vec3 ambient =  2 * colorLuz;
+
 	vec3 ld = normalize(-direccionLuzSerpiente);
 	vec3 fd = normalize(vec3((-FragPos + posicionLuzSerpiente)));
-
+	vec3 norm; 
+	vec3 luzDir;
+	float diff; 
+	vec3 difusaCabeza;
 	if(acos(dot(fd,ld)) < radians(35)){
 		//Difusa
-		vec3 norm = normalize(Normal);
-		vec3 lightDir = normalize(posicionLuzSerpiente - FragPos);
-		float diff = max(dot(norm, lightDir), 0.0);
-		vec3 diffuse = 3 * diff * vec3(0.7f, 0.7f, .3f);
-
-		//comprobamos si el objeto tiene textura
-		if(texture2D(texture1, TexCoord)==vec4(0.0,0.0,0.0,1.0)){
-			//si no tiene lo pintamos de su color
-			vec3 result = ((ambient + diffuse) * objectColor)/2;
-			FragColor = vec4(result, 1.0);
-		}else{
-			vec3 result = ((ambient + diffuse) * vec3(1.0, 1.0, 1.0))/2;
-			FragColor = vec4(result, 1.0) * texture2D(texture1, TexCoord);
-		}
+		norm = normalize(Normal);
+		luzDir = normalize(posicionLuzSerpiente - FragPos);
+		diff = max(dot(norm, luzDir), 0.0);
+		difusaCabeza = 3 * diff * vec3(0.7f, 0.7f, .3f);
 	} else {
-		//comprobamos si el objeto tiene textura
-		if(texture2D(texture1, TexCoord)==vec4(0.0,0.0,0.0,1.0)){
-			//si no tiene lo pintamos de su color
-			vec3 result = ((ambient) * objectColor)/2;
-			FragColor = vec4(result, 1.0);
-		}else{
-			vec3 result = ((ambient) * vec3(1.0, 1.0, 1.0))/2;
-			FragColor = vec4(result, 1.0) * texture2D(texture1, TexCoord);
-		}
+		difusaCabeza = vec3(0.0, 0.0, 0.0);
+	}
+	//luz difusa en la fruta
+	norm = normalize(Normal);
+	luzDir = normalize(posicionLuzFruta - FragPos);
+	diff = max(dot(norm, luzDir), 0.0);
+	vec3 difusaFruta = diff * vec3(1.0f, 0.7f, 1.0f);
+
+	//comprobamos si el objeto tiene textura
+	if(texture2D(texture1, TexCoord)==vec4(0.0,0.0,0.0,1.0)){
+		//si no tiene lo pintamos de su color
+		vec3 result = ((ambient + difusaCabeza + difusaFruta) * objectColor)/2;
+		FragColor = vec4(result, 1.0);
+	}else{
+		vec3 result = ((ambient + difusaCabeza + difusaFruta) * vec3(1.0, 1.0, 1.0))/2;
+		FragColor = vec4(result, 1.0) * texture2D(texture1, TexCoord);
 	}
 }

@@ -89,7 +89,7 @@ void iluminacion(Fruta comida) {
 	//el color de la luz ambiente 
 	unsigned int lightLoc = glGetUniformLocation(shaderProgram, "colorLuz");
 	//luz blanca
-	glUniform3f(lightLoc, 0.5f, 0.5f, 1.0f);
+	glUniform3f(lightLoc, 0.3f, 0.3f, 1.0f);
 	//luz difusa en la cabeza 
 	unsigned int lightPosLoc = glGetUniformLocation(shaderProgram, "posicionLuzSerpiente");
 	glUniform3f(lightPosLoc, serpiente.getCabeza().getX(), serpiente.getCabeza().getY(), 0.5);
@@ -461,7 +461,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		default:
 			break;
 	}
-	printf("%d\n", key);
 }
 
 //funcion de reescalado
