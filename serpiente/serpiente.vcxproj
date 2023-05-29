@@ -135,6 +135,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Parte.cpp" />
     <ClCompile Include="Serpiente.cpp" />
+    <ClCompile Include="Suelo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="fruta.h" />
@@ -143,10 +144,12 @@
     <ClInclude Include="parte.h" />
     <ClInclude Include="serpiente.h" />
     <ClInclude Include="stb_image.h" />
+    <ClInclude Include="suelo.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader.frag" />
     <None Include="shader.vert" />
+    <None Include="shaderJuego.frag" />
+    <None Include="shaderTitulos.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

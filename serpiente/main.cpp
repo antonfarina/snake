@@ -10,6 +10,7 @@
 #include "geometrias.h"
 #include "serpiente.h"
 #include "fruta.h"
+#include "suelo.h"
 
 //transformaciones
 #include <glm/glm.hpp>
@@ -27,7 +28,7 @@ GLuint ALTO = 800;
 
 GLuint comenzar = 0;
 GLuint perder = 0;
-GLuint shaderProgram;
+GLuint shaderJuego, shaderTitulos;
 GLuint camara = 0;
 
 //VAOS para crear los objetos
@@ -37,7 +38,7 @@ GLuint VAOEsfera;
 
 Serpiente serpiente(3, &VAOCubo, 36, &VAOEsfera, 1080);
 
-GLuint texturaSerpiente1, texturaSerpiente2, hierba1, hierba2, texturaOjo, texturaPerder;
+GLuint texturaSerpiente1, texturaSerpiente2, hierba1, hierba2, texturaOjo, texturaPerder, puntos[10], texturaPuntos;
 std::unordered_map<unsigned int, GLuint> texturasFruta;
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -46,26 +47,24 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 extern GLuint setShaders(const char* nVertix, const char* nFrag);
 
 void camaraAlejada() {
-	glViewport(400, 0, ANCHO, ALTO);
 	//Matriz de vista
 	glm::mat4 view;
 	//Cargamos la identidad
 	view = glm::mat4();
 	//establecemos la posicion del observador
 	view = glm::lookAt(glm::vec3(0, 0, 20 * ESCALA), glm::vec3(.0f, .0f, .0f), glm::vec3(.0f, 1, .0f));
-	unsigned int viewLoc = glad_glGetUniformLocation(shaderProgram, "view");
+	unsigned int viewLoc = glad_glGetUniformLocation(shaderJuego, "view");
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	//Matriz de proyección
 	glm::mat4 projection;
 	//Cargamos la identidad
 	projection = glm::mat4();
-	projection = glm::perspective(45.0f, (float) ANCHO/ (float) ALTO, 0.01f, 21.0f);
-	unsigned int projectionLoc = glad_glGetUniformLocation(shaderProgram, "projection");
+	projection = glm::perspective(45.0f, (float) ANCHO/2/ (float) ALTO, 0.01f, 21.0f);
+	unsigned int projectionLoc = glad_glGetUniformLocation(shaderJuego, "projection");
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 }
 
 void camaraCabeza() {
-	glViewport(400, 0, ANCHO, ALTO);
 	//Matriz de vista
 	glm::mat4 view;
 	//Cargamos la identidad
@@ -74,29 +73,29 @@ void camaraCabeza() {
 	glm::vec3 observador = glm::vec3(serpiente.getCabeza().getX() - 8*glm::cos(glm::radians((float)serpiente.getCabeza().getGiro())), serpiente.getCabeza().getY() - 8*glm::sin(glm::radians((float)serpiente.getCabeza().getGiro())), 8);
 	glm::vec3 vision = glm::vec3(serpiente.getCabeza().getX() + glm::cos(glm::radians((float)serpiente.getCabeza().getGiro())), serpiente.getCabeza().getY() + glm::sin(glm::radians((float)serpiente.getCabeza().getGiro())), 0);
 	view = glm::lookAt(observador,vision, glm::vec3(.0f, 0, 1.0f));
-	unsigned int viewLoc = glad_glGetUniformLocation(shaderProgram, "view");
+	unsigned int viewLoc = glad_glGetUniformLocation(shaderJuego, "view");
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	//Matriz de proyección
 	glm::mat4 projection;
 	//Cargamos la identidad
 	projection = glm::mat4();
-	projection = glm::perspective(45.0f, (float)ANCHO / (float)ALTO, 0.01f, 30.0f);
-	unsigned int projectionLoc = glad_glGetUniformLocation(shaderProgram, "projection");
+	projection = glm::perspective(45.0f, (float)ANCHO/2 / (float)ALTO, 0.01f, 30.0f);
+	unsigned int projectionLoc = glad_glGetUniformLocation(shaderJuego, "projection");
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 }
 
 void iluminacion(Fruta comida) {
 	//el color de la luz ambiente 
-	unsigned int lightLoc = glGetUniformLocation(shaderProgram, "colorLuz");
+	unsigned int lightLoc = glGetUniformLocation(shaderJuego, "colorLuz");
 	//luz blanca
 	glUniform3f(lightLoc, 0.3f, 0.3f, 1.0f);
 	//luz difusa en la cabeza 
-	unsigned int lightPosLoc = glGetUniformLocation(shaderProgram, "posicionLuzSerpiente");
+	unsigned int lightPosLoc = glGetUniformLocation(shaderJuego, "posicionLuzSerpiente");
 	glUniform3f(lightPosLoc, serpiente.getCabeza().getX(), serpiente.getCabeza().getY(), 0.5);
-	unsigned int luzDirLoc = glGetUniformLocation(shaderProgram, "direccionLuzSerpiente");
+	unsigned int luzDirLoc = glGetUniformLocation(shaderJuego, "direccionLuzSerpiente");
 	glUniform3f(luzDirLoc, glm::cos(glm::radians((float)serpiente.getCabeza().getGiro())), glm::sin(glm::radians((float)serpiente.getCabeza().getGiro())), 0);
 	//luz difusa en la fruta
-	lightPosLoc = glGetUniformLocation(shaderProgram, "posicionLuzFruta");
+	lightPosLoc = glGetUniformLocation(shaderJuego, "posicionLuzFruta");
 	glUniform3f(lightPosLoc, comida.getX(), comida.getY(), 8);
 }
 
@@ -143,39 +142,6 @@ void creaVAO(float* vertices, unsigned int tam, GLuint* VAO, int color) {
 	glDeleteBuffers(1, &VBO);
 }
 
-//funcion de dibujo del suelo
-void dibujaSuelo(GLuint shaderProgram) {
-	//creamos las matrices del modelo
-	glm::mat4 model;
-	//la busco en el shader
-	unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-	int i, j;
-	for (i = -LIMITE; i <= LIMITE; i++) {
-		for (j = -LIMITE; j <= LIMITE; j++) {
-			//Calculo la matriz
-			model = glm::mat4(); //identity matrix
-			//trasladamos para dibujar cada cuadrado
-			model = glm::translate(model, glm::vec3(i*ESCALA, j*ESCALA, 0.0f));
-			model = glm::scale(model, glm::vec3(ESCALA, ESCALA, 1));
-			if ((i + j) % 2) {
-				glBindTexture(GL_TEXTURE_2D, hierba1);
-			}
-			else {
-				glBindTexture(GL_TEXTURE_2D, hierba2);
-			}
-			
-			//La cargo
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-			//dibujamos el cuadrado
-			glBindVertexArray(VAOCuadrado);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-		}
-	}
-}
-
-
 GLuint cargaTextura(const char* ruta) {
 	GLuint textura;
 	int width, height, nrChannels, formato;
@@ -211,7 +177,7 @@ GLuint cargaTextura(const char* ruta) {
 }
 
 void dibujarFin() {
-	unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
+	unsigned int modelLoc = glGetUniformLocation(shaderJuego, "model");
 	//matriz de transformacion
 	glm::mat4 model = glm::mat4();
 	model = glm::scale(model, glm::vec3(30,20, 1));
@@ -223,6 +189,55 @@ void dibujarFin() {
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
+
+void dibujarPuntos(GLuint shader) {
+	//viewport de la izquierda
+	glViewport(0, 0, 800, 800);
+	unsigned int modelLoc = glGetUniformLocation(shader, "model");
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glm::mat4 model;
+	//dibujamos el titulo snake
+	model = glm::mat4();
+	model = glm::translate(model, glm::vec3(0, 9, 0));
+	model = glm::scale(model, glm::vec3(9, 2, 1));
+	//La cargo
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+	glBindVertexArray(VAOCuadrado);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	//dibujamos el titulo puntos
+	model = glm::mat4();
+	model = glm::translate(model, glm::vec3(0, 3, 0));
+	model = glm::scale(model, glm::vec3(9, 2, 1));
+	//La cargo
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+	glBindVertexArray(VAOCuadrado);
+	glBindTexture(GL_TEXTURE_2D, texturaPuntos);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	//dibujamos los puntos
+	for (int i = -2; i <= 2; i+=2) {
+		glm::mat4 model = glm::mat4();
+		model = glm::translate(model, glm::vec3(i, 0, 0));
+		model = glm::scale(model, glm::vec3(2, 2, 1));
+		//La cargo
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glBindVertexArray(VAOCuadrado);
+		//puntos
+		if (i == -2) {
+			glBindTexture(GL_TEXTURE_2D, puntos[serpiente.getPuntos() / 100]);
+		}
+		else if (i == 0) {
+			glBindTexture(GL_TEXTURE_2D, puntos[serpiente.getPuntos() / 10]);
+		}
+		else if (i == 2) {
+			glBindTexture(GL_TEXTURE_2D, puntos[serpiente.getPuntos() % 10]);
+		}
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 
 void openGlInit() {
 	glClearDepth(1.0f); //Valor z-buffer
@@ -264,8 +279,8 @@ int main() {
 	openGlInit();
 
 	//generarShader();
-	shaderProgram = setShaders("shader.vert", "shader.frag");
-	glUseProgram(shaderProgram);
+	shaderJuego = setShaders("shader.vert", "shaderJuego.frag");
+	shaderTitulos = setShaders("shader.vert", "shaderTitulos.frag");
 
 	//creamos los VAOS
 	creaVAO(vertices_cuadrado, sizeof(vertices_cuadrado), &VAOCuadrado, 1);
@@ -293,10 +308,18 @@ int main() {
 	hierba2 = cargaTextura("../texturas/hierba2.jpg");
 	texturaOjo = cargaTextura("../texturas/ojo.jpg");
 	texturaPerder = cargaTextura("../texturas/perder.jpg");
+	texturaPuntos = cargaTextura("../texturas/puntos.png");
 	serpiente.texturizar(texturaSerpiente1, texturaSerpiente2, texturaOjo);
+	//texturas de los puntos
+	std::string ruta;
+	for (int i = 0; i <= 9; i++) {
+		ruta = "../texturas/" + std::to_string(i) + ".png";
+		puntos[i] = cargaTextura(ruta.c_str());
+	}
 	// Lazo de la ventana mientras no la cierre
 	// -----------
 	Fruta comida(ESCALA/2.0, 0, &VAOEsfera, texturasFruta, 1080, serpiente);
+	Suelo suelo(VAOCuadrado, hierba1, hierba2);
 	while (!glfwWindowShouldClose(window)){
 		// input
 		// -----
@@ -316,10 +339,14 @@ int main() {
 		}
 		iluminacion(comida);
 		if (!perder) {
+			glUseProgram(shaderTitulos);
+			dibujarPuntos(shaderTitulos);
+			glUseProgram(shaderJuego);
+			glViewport(ANCHO/2, 0, ANCHO/2, ALTO);
 			//Dibujo del suelo
-			dibujaSuelo(shaderProgram);
-			serpiente.dibujar(shaderProgram);
-			comida.dibujar(shaderProgram);
+			suelo.dibujar(shaderJuego);
+			serpiente.dibujar(shaderJuego);
+			comida.dibujar(shaderJuego);
 			if (comenzar) {
 				if (!serpiente.avanzar(&comida)) {
 					perder = ~perder;
@@ -327,6 +354,7 @@ int main() {
 				}
 			}
 		}else {
+			glUseProgram(shaderTitulos);
 			camaraAlejada();
 			dibujarFin();
 		}
@@ -359,39 +387,45 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		case 265://flecha arriba
 			if (camara == 0) {
 				if (comenzar && action == GLFW_RELEASE) {
-					if (serpiente.getDireccion() == IZQUIERDA) {
-						serpiente.girar(-90);
+					if (serpiente.getDireccion() != ARRIBA && serpiente.getDireccion() != ABAJO) {
+						if (serpiente.getDireccion() == IZQUIERDA) {
+							serpiente.girar(-90);
+						}
+						else {
+							serpiente.girar(90);
+						}
+						serpiente.setDireccion(ARRIBA);
 					}
-					else {
-						serpiente.girar(90);
-					}
-					serpiente.setDireccion(ARRIBA);
 				}
 			}
 			break;
 		case 264://flecha abajo
 			if (camara == 0) {
-				if (comenzar && serpiente.getDireccion() != ARRIBA && action == GLFW_RELEASE) {
-					if (serpiente.getDireccion() == IZQUIERDA) {
-						serpiente.girar(90);
+				if (comenzar && action == GLFW_RELEASE) {
+					if (serpiente.getDireccion() != ABAJO && serpiente.getDireccion() != ARRIBA) {
+						if (serpiente.getDireccion() == IZQUIERDA) {
+							serpiente.girar(90);
+						}
+						else {
+							serpiente.girar(-90);
+						}
+						serpiente.setDireccion(ABAJO);
 					}
-					else {
-						serpiente.girar(-90);
-					}
-					serpiente.setDireccion(ABAJO);
 				}
 			}			
 			break;
 		case 262://flecha derecha
 			if (camara == 0) {
-				if (comenzar && serpiente.getDireccion() != IZQUIERDA && action == GLFW_RELEASE) {
-					if (serpiente.getDireccion() == ARRIBA) {
-						serpiente.girar(-90);
+				if (comenzar && action == GLFW_RELEASE) {
+					if (serpiente.getDireccion() != DERECHA && serpiente.getDireccion() != IZQUIERDA) {
+						if (serpiente.getDireccion() == ARRIBA) {
+							serpiente.girar(-90);
+						}
+						else {
+							serpiente.girar(90);
+						}
+						serpiente.setDireccion(DERECHA);
 					}
-					else {
-						serpiente.girar(90);
-					}
-					serpiente.setDireccion(DERECHA);
 				}
 			}else {
 				if (comenzar && action == GLFW_RELEASE) {
@@ -416,14 +450,16 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			break;
 		case 263://flecha izquierda
 			if (camara == 0) {
-				if (comenzar && serpiente.getDireccion() != IZQUIERDA && action == GLFW_RELEASE) {
-					if (serpiente.getDireccion() == ARRIBA) {
-						serpiente.girar(90);
+				if (comenzar && action == GLFW_RELEASE) {
+					if (serpiente.getDireccion() != IZQUIERDA && serpiente.getDireccion() != DERECHA) {
+						if (serpiente.getDireccion() == ARRIBA) {
+							serpiente.girar(90);
+						}
+						else {
+							serpiente.girar(-90);
+						}
+						serpiente.setDireccion(IZQUIERDA);
 					}
-					else {
-						serpiente.girar(-90);
-					}
-					serpiente.setDireccion(IZQUIERDA);
 				}
 			}
 			else {
@@ -452,7 +488,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			break;
 			//numero 0 camara alejada
 		case 48:
-			camara=0;
+			camara = 0;
 			break;
 			//numero 1 camara en la cabeza
 		case 49:

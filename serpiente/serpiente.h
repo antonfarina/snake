@@ -7,13 +7,12 @@
 #include "glad.h"
 #include "parte.h"
 #include "fruta.h"
+#include "suelo.h"
 
 #define ARRIBA 0
 #define ABAJO 1
 #define IZQUIERDA 2
 #define DERECHA 3
-#define LIMITE 10
-#define ESCALA 1
 #define VELOCIDAD 0.3
 
 class Serpiente {
@@ -34,6 +33,7 @@ class Serpiente {
         void dibujar(GLuint shader);
         Parte getCabeza();
         int getLongitud();
+        int getPuntos();
         std::vector<Parte> getCuerpo();
         void texturizar(GLuint textura1, GLuint textura2, GLuint texturaOjo);
         void girar(float giro);

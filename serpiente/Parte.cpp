@@ -95,4 +95,5 @@ void Parte::dibujar(GLuint shader){
     glBindVertexArray(*this->getGeometria());
     glBindTexture(GL_TEXTURE_2D, this->getTextura());
     glDrawArrays(GL_TRIANGLES, 0, this->getNTriangulos());
+    glBindTexture(GL_TEXTURE_2D, 0);
 }

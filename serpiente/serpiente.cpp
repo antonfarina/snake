@@ -150,6 +150,10 @@ int Serpiente::getLongitud(){
     return this->longitud;
 }
 
+int Serpiente::getPuntos(){
+    return this->puntos;
+}
+
 std::vector<Parte> Serpiente::getCuerpo(){
     return this->cuerpo;
 }

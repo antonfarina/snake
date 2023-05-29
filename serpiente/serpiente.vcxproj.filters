@@ -30,6 +30,9 @@
     <ClCompile Include="Fruta.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
+    <ClCompile Include="Suelo.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lecturaShader.h">
@@ -50,12 +53,18 @@
     <ClInclude Include="fruta.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="suelo.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader.frag">
+    <None Include="shader.vert">
       <Filter>Archivos de recursos</Filter>
     </None>
-    <None Include="shader.vert">
+    <None Include="shaderJuego.frag">
+      <Filter>Archivos de recursos</Filter>
+    </None>
+    <None Include="shaderTitulos.frag">
       <Filter>Archivos de recursos</Filter>
     </None>
   </ItemGroup>

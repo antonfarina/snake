@@ -4,6 +4,7 @@
 #include "parte.h"
 #include "serpiente.h"
 #include <unordered_map>
+#include "suelo.h"
 
 //clase hija de Parte
 class Fruta: public Parte {
