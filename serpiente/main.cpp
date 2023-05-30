@@ -208,7 +208,7 @@ void dibujarPuntos(GLuint shader) {
 	//dibujamos el titulo puntos
 	model = glm::mat4();
 	model = glm::translate(model, glm::vec3(0, 3, 0));
-	model = glm::scale(model, glm::vec3(9, 2, 1));
+	model = glm::scale(model, glm::vec3(10, 3, 1));
 	//La cargo
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 	glBindVertexArray(VAOCuadrado);
@@ -216,21 +216,21 @@ void dibujarPuntos(GLuint shader) {
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	//dibujamos los puntos
-	for (int i = -2; i <= 2; i+=2) {
+	for (int i = -3; i <= 3; i+=3) {
 		glm::mat4 model = glm::mat4();
-		model = glm::translate(model, glm::vec3(i, 0, 0));
-		model = glm::scale(model, glm::vec3(2, 2, 1));
+		model = glm::translate(model, glm::vec3(i, -2, 0));
+		model = glm::scale(model, glm::vec3(3, 4, 1));
 		//La cargo
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glBindVertexArray(VAOCuadrado);
 		//puntos
-		if (i == -2) {
+		if (i == -3) {
 			glBindTexture(GL_TEXTURE_2D, puntos[serpiente.getPuntos() / 100]);
 		}
 		else if (i == 0) {
 			glBindTexture(GL_TEXTURE_2D, puntos[serpiente.getPuntos() / 10]);
 		}
-		else if (i == 2) {
+		else if (i == 3) {
 			glBindTexture(GL_TEXTURE_2D, puntos[serpiente.getPuntos() % 10]);
 		}
 		glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -320,6 +320,8 @@ int main() {
 	// -----------
 	Fruta comida(ESCALA/2.0, 0, &VAOEsfera, texturasFruta, 1080, serpiente);
 	Suelo suelo(VAOCuadrado, hierba1, hierba2);
+	glUseProgram(shaderJuego);
+	glUseProgram(shaderTitulos);
 	while (!glfwWindowShouldClose(window)){
 		// input
 		// -----
@@ -342,7 +344,7 @@ int main() {
 			glUseProgram(shaderTitulos);
 			dibujarPuntos(shaderTitulos);
 			glUseProgram(shaderJuego);
-			glViewport(ANCHO/2, 0, ANCHO/2, ALTO);
+			glViewport(ANCHO/2.1, 0, ANCHO/2, ALTO);
 			//Dibujo del suelo
 			suelo.dibujar(shaderJuego);
 			serpiente.dibujar(shaderJuego);
