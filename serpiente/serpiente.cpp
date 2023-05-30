@@ -100,7 +100,6 @@ bool Serpiente::avanzar(Fruta* comida) {
             comida->colocar(this);
             if(velocidad - 0.03 > 0.2)velocidad -= 0.02;
             puntos++;
-            printf("%d\n", puntos);
         }
         //actualizamos las posiciones del cuerpo con la posicion del anterior
         for (std::size_t i = this->longitud - 1; i > 0; i--) {

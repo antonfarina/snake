@@ -88,7 +88,8 @@ void iluminacion(Fruta comida) {
 	//el color de la luz ambiente 
 	unsigned int lightLoc = glGetUniformLocation(shaderJuego, "colorLuz");
 	//luz blanca
-	glUniform3f(lightLoc, 0.3f, 0.3f, 1.0f);
+	//glUniform3f(lightLoc, 0.3f, 0.3f, 1.0f);
+	glUniform3f(lightLoc, 1.0f, 1.0f, 1.0f);
 	//luz difusa en la cabeza 
 	unsigned int lightPosLoc = glGetUniformLocation(shaderJuego, "posicionLuzSerpiente");
 	glUniform3f(lightPosLoc, serpiente.getCabeza().getX(), serpiente.getCabeza().getY(), 0.5);

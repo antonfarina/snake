@@ -15,7 +15,7 @@ uniform vec3 posicionLuzFruta;
 uniform sampler2D texture1;
 
 void main(){
-	vec3 ambient =  2 * colorLuz;
+	vec3 ambient = 0.25 * colorLuz;
 
 	vec3 ld = normalize(-direccionLuzSerpiente);
 	vec3 fd = normalize(vec3((-FragPos + posicionLuzSerpiente)));
@@ -28,7 +28,7 @@ void main(){
 		norm = normalize(Normal);
 		luzDir = normalize(posicionLuzSerpiente - FragPos);
 		diff = max(dot(norm, luzDir), 0.0);
-		difusaCabeza = 3 * diff * vec3(0.7f, 0.7f, .3f);
+		difusaCabeza = 1.5 * diff * vec3(1.0f, 1.0f, 0.2f);
 	} else {
 		difusaCabeza = vec3(0.0, 0.0, 0.0);
 	}
@@ -36,7 +36,7 @@ void main(){
 	norm = normalize(Normal);
 	luzDir = normalize(posicionLuzFruta - FragPos);
 	diff = max(dot(norm, luzDir), 0.0);
-	vec3 difusaFruta = diff * vec3(1.0f, 0.7f, 1.0f);
+	vec3 difusaFruta = 1.1 * diff * vec3(1.0f, 0.7f, 1.0f);
 
 	//comprobamos si el objeto tiene textura
 	if(texture2D(texture1, TexCoord)==vec4(0.0,0.0,0.0,1.0)){
