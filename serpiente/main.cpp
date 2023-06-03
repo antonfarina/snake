@@ -181,7 +181,8 @@ void dibujarFin() {
 	unsigned int modelLoc = glGetUniformLocation(shaderJuego, "model");
 	//matriz de transformacion
 	glm::mat4 model = glm::mat4();
-	model = glm::scale(model, glm::vec3(30,20, 1));
+	model = glm::translate(model, glm::vec3(0, 0, 1));
+	model = glm::scale(model, glm::vec3(20,20, 1));
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glBindTexture(GL_TEXTURE_2D, texturaPerder);
 	//La cargo
@@ -308,7 +309,7 @@ int main() {
 	hierba1 = cargaTextura("../texturas/hierba1.jpg");
 	hierba2 = cargaTextura("../texturas/hierba2.jpg");
 	texturaOjo = cargaTextura("../texturas/ojo.jpg");
-	texturaPerder = cargaTextura("../texturas/perder.jpg");
+	texturaPerder = cargaTextura("../texturas/perder.png");
 	texturaPuntos = cargaTextura("../texturas/puntos.png");
 	serpiente.texturizar(texturaSerpiente1, texturaSerpiente2, texturaOjo);
 	//texturas de los puntos
@@ -331,14 +332,14 @@ int main() {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);//Borro el buffer de la ventana
 		glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
 		switch (camara)	{
-		case 0:
-			camaraAlejada();
-			break;
-		case 1: 
-			camaraCabeza();
-			break;
-		default:
-			break;
+			case 0:
+				camaraAlejada();
+				break;
+			case 1: 
+				camaraCabeza();
+				break;
+			default:
+				break;
 		}
 		iluminacion(comida);
 		if (!perder) {
@@ -357,6 +358,12 @@ int main() {
 				}
 			}
 		}else {
+			glUseProgram(shaderTitulos);
+			dibujarPuntos(shaderTitulos);
+			glUseProgram(shaderJuego);
+			glViewport(ANCHO / 2.1, 0, ANCHO / 2, ALTO);
+			//Dibujo del suelo
+			suelo.dibujar(shaderJuego);
 			glUseProgram(shaderTitulos);
 			camaraAlejada();
 			dibujarFin();
