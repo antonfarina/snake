@@ -6,7 +6,7 @@
 #include <string>
 #include <unordered_map>
 
-
+//Incluimos la definición de todas las clases que se utilizarán
 #include "geometrias.h"
 #include "serpiente.h"
 #include "fruta.h"
@@ -26,27 +26,30 @@
 GLuint ANCHO = 1600;
 GLuint ALTO = 800;
 
-GLuint comenzar = 0;
-GLuint perder = 0;
-GLuint shaderJuego, shaderTitulos;
-GLuint camara = 0;
+GLuint shaderJuego, shaderTitulos; //Variables que referencian los shaders
+
+bool comenzar = false;//Flag que marca si se ha iniciado el juego
+bool perder = false;//Flag que marca si el jugador ha perdido
+
+unsigned int camara = 0;//Flag que marca la cámara utilizada
 
 //VAOS para crear los objetos
 GLuint VAOCuadrado;
 GLuint VAOCubo;
 GLuint VAOEsfera;
 
-Serpiente serpiente(3, &VAOCubo, 36, &VAOEsfera, 1080);
+Serpiente serpiente(3, &VAOCubo, 36, &VAOEsfera, 1080);//Creamos la serpiente
 
+//Índices de texturas
 GLuint texturaSerpiente1, texturaSerpiente2, hierba1, hierba2, texturaOjo, texturaPerder, puntos[10], texturaPuntos;
-std::unordered_map<unsigned int, GLuint> texturasFruta;
+std::unordered_map<unsigned int, GLuint> texturasFruta;//Mapa de las texturas de las frutas
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void processInput(GLFWwindow* window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 extern GLuint setShaders(const char* nVertix, const char* nFrag);
 
-void camaraAlejada() {
+void camaraAlejada() {//Visión del juego desde una posición cenital (usual del juego)
 	//Matriz de vista
 	glm::mat4 view;
 	//Cargamos la identidad
@@ -64,7 +67,7 @@ void camaraAlejada() {
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 }
 
-void camaraCabeza() {
+void camaraCabeza() {//Visión del juego desde la perspectiva de la serpiente
 	//Matriz de vista
 	glm::mat4 view;
 	//Cargamos la identidad
@@ -158,6 +161,7 @@ GLuint cargaTextura(const char* ruta) {
 	stbi_set_flip_vertically_on_load(true);
 	//cargamos la imagen
 	unsigned char* imagen = stbi_load(ruta, &width, &height, &nrChannels, 0);
+	//Seleccinamos según el número de canales utilizados
 	if (nrChannels == 1) {
 		formato = GL_RED;
 	}else if (nrChannels == 3) {
@@ -177,7 +181,7 @@ GLuint cargaTextura(const char* ruta) {
 	return textura;
 }
 
-void dibujarFin() {
+void dibujarFin() {//Función que dibuja la pantalla de fin de partida
 	unsigned int modelLoc = glGetUniformLocation(shaderJuego, "model");
 	//matriz de transformacion
 	glm::mat4 model = glm::mat4();
@@ -191,7 +195,7 @@ void dibujarFin() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void dibujarPuntos(GLuint shader) {
+void dibujarPuntos(GLuint shader) {//Función que dibuja los puntos y los títulos del juego
 	//viewport de la izquierda
 	glViewport(0, 0, 800, 800);
 	unsigned int modelLoc = glGetUniformLocation(shader, "model");
@@ -225,13 +229,13 @@ void dibujarPuntos(GLuint shader) {
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glBindVertexArray(VAOCuadrado);
 		//puntos
-		if (i == -3) {
+		if (i == -3) {//En esta posición van las centenas
 			glBindTexture(GL_TEXTURE_2D, puntos[serpiente.getPuntos() / 100]);
 		}
-		else if (i == 0) {
+		else if (i == 0) {//En esta posición van las decenas
 			glBindTexture(GL_TEXTURE_2D, puntos[serpiente.getPuntos() / 10]);
 		}
-		else if (i == 3) {
+		else if (i == 3) {//En esta posición van las unidades
 			glBindTexture(GL_TEXTURE_2D, puntos[serpiente.getPuntos() % 10]);
 		}
 		glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -279,7 +283,7 @@ int main() {
 	glfwSetKeyCallback(window, keyCallback);
 	openGlInit();
 
-	//generarShader();
+	//Se setean los distintos shaders
 	shaderJuego = setShaders("shader.vert", "shaderJuego.frag");
 	shaderTitulos = setShaders("shader.vert", "shaderTitulos.frag");
 
@@ -288,10 +292,11 @@ int main() {
 	creaVAO(vertices_esfera, sizeof(vertices_esfera), &VAOEsfera, 0);
 	creaVAO(vertices_cubo, sizeof(vertices_cubo), &VAOCubo, 1);
 
-	//creamos las texturas
+	//creamos las texturas de la serpiente
 	texturaSerpiente1 = cargaTextura("../texturas/serpiente_marron.jpg");
 	texturaSerpiente2 = cargaTextura("../texturas/serpiente_amarilla.jpg");
-	//texturas de las frutas
+	texturaOjo = cargaTextura("../texturas/ojo.jpg");
+	//creamos las texturas de las frutas y las añadimos al mapa
 	GLuint texturaFruta;
 	texturaFruta = cargaTextura("../texturas/piña.jpg");
 	texturasFruta.insert({ 0, texturaFruta });
@@ -305,12 +310,16 @@ int main() {
 	texturasFruta.insert({ 4, texturaFruta });
 	texturaFruta = cargaTextura("../texturas/manzana.jpg");
 	texturasFruta.insert({ 5, texturaFruta });
+	//creamos las texturas de la hiberba
 	hierba1 = cargaTextura("../texturas/hierba1.jpg");
 	hierba2 = cargaTextura("../texturas/hierba2.jpg");
-	texturaOjo = cargaTextura("../texturas/ojo.jpg");
+	//Creamos las texturas para los cambios de pantalla
 	texturaPerder = cargaTextura("../texturas/perder.jpg");
 	texturaPuntos = cargaTextura("../texturas/puntos.png");
+
+	//Se añaden las texturas a la serpiente
 	serpiente.texturizar(texturaSerpiente1, texturaSerpiente2, texturaOjo);
+
 	//texturas de los puntos
 	std::string ruta;
 	for (int i = 0; i <= 9; i++) {
@@ -330,7 +339,8 @@ int main() {
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);//Borro el buffer de la ventana
 		glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
-		switch (camara)	{
+
+		switch (camara)	{//Se selecciona la cámara
 		case 0:
 			camaraAlejada();
 			break;
@@ -341,7 +351,7 @@ int main() {
 			break;
 		}
 		iluminacion(comida);
-		if (!perder) {
+		if (!perder) {//Si no se ha perdido, se desarrolla el juego
 			glUseProgram(shaderTitulos);
 			dibujarPuntos(shaderTitulos);
 			glUseProgram(shaderJuego);
@@ -350,13 +360,13 @@ int main() {
 			suelo.dibujar(shaderJuego);
 			serpiente.dibujar(shaderJuego);
 			comida.dibujar(shaderJuego);
-			if (comenzar) {
+			if (comenzar) {//Si el usuario ha empezado el juego se avanza
 				if (!serpiente.avanzar(&comida)) {
-					perder = ~perder;
-					comenzar = ~comenzar;
+					perder = !perder;
+					comenzar = !comenzar;
 				}
 			}
-		}else {
+		}else {//Si se ha perdido se muestra el fin
 			glUseProgram(shaderTitulos);
 			camaraAlejada();
 			dibujarFin();
@@ -388,8 +398,9 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	switch (key){
 		//movimiento de la serpiente
 		case 265://flecha arriba
-			if (camara == 0) {
+			if (camara == 0) {//Solo si se está jugando con la cámara alejada
 				if (comenzar && action == GLFW_RELEASE) {
+					//Si la serpiente no va ya en esa dirección o en la opuesta, se gira y actualiza la dirección
 					if (serpiente.getDireccion() != ARRIBA && serpiente.getDireccion() != ABAJO) {
 						if (serpiente.getDireccion() == IZQUIERDA) {
 							serpiente.girar(-90);
@@ -403,8 +414,9 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			}
 			break;
 		case 264://flecha abajo
-			if (camara == 0) {
+			if (camara == 0) {//Solo si se está jugando con la cámara alejada
 				if (comenzar && action == GLFW_RELEASE) {
+					//Si la serpiente no va ya en esa dirección o en la opuesta, se gira y actualiza la dirección
 					if (serpiente.getDireccion() != ABAJO && serpiente.getDireccion() != ARRIBA) {
 						if (serpiente.getDireccion() == IZQUIERDA) {
 							serpiente.girar(90);
@@ -418,8 +430,9 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			}			
 			break;
 		case 262://flecha derecha
-			if (camara == 0) {
+			if (camara == 0) {//Si se juega con la cámara alejada
 				if (comenzar && action == GLFW_RELEASE) {
+					//Si la serpiente no va ya en esa dirección o en la opuesta, se gira y actualiza la dirección
 					if (serpiente.getDireccion() != DERECHA && serpiente.getDireccion() != IZQUIERDA) {
 						if (serpiente.getDireccion() == ARRIBA) {
 							serpiente.girar(-90);
@@ -430,8 +443,8 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 						serpiente.setDireccion(DERECHA);
 					}
 				}
-			}else {
-				if (comenzar && action == GLFW_RELEASE) {
+			}else {//Si se juega con la cámara de la serpiente
+				if (comenzar && action == GLFW_RELEASE) {//Se gira y actualiza la dirección
 					serpiente.girar(-90);
 					switch (serpiente.getDireccion()) {
 						case ARRIBA:
@@ -452,8 +465,9 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			
 			break;
 		case 263://flecha izquierda
-			if (camara == 0) {
+			if (camara == 0) {//Si se juega con la cámara alejada
 				if (comenzar && action == GLFW_RELEASE) {
+					//Si la serpiente no va ya en esa dirección o en la opuesta, se gira y actualiza la dirección
 					if (serpiente.getDireccion() != IZQUIERDA && serpiente.getDireccion() != DERECHA) {
 						if (serpiente.getDireccion() == ARRIBA) {
 							serpiente.girar(90);
@@ -465,8 +479,8 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 					}
 				}
 			}
-			else {
-				if (comenzar && action == GLFW_RELEASE) {
+			else {//Si se juega con la cámara de la serpiente
+				if (comenzar && action == GLFW_RELEASE) {//Se gira y actualiza la dirección
 					serpiente.girar(90);
 					switch (serpiente.getDireccion()) {
 					case ARRIBA:
@@ -485,16 +499,13 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 				}
 			}
 		break;
-		//dandole al espacio se empieza el juego
-		case 32:
-			comenzar = 1;
+		case 32://Dándole al espacio se empieza el juego
+			comenzar = true;
 			break;
-			//numero 0 camara alejada
-		case 48:
+		case 48://Número cambia a cámara alejada
 			camara = 0;
 			break;
-			//numero 1 camara en la cabeza
-		case 49:
+		case 49://Número 1 cámara en la serpiente
 			camara = 1;
 			break;
 		default:
