@@ -9,8 +9,11 @@
 #define OJOS_Y 0.3 //Factor de variación coordenada y de los ojos
 #define OJOS_COCIENTE 0.15 //Factor que divide la posición de los ojos con la variación
 
+Serpiente::Serpiente(){
+}
+
 //constructor
-Serpiente::Serpiente(int longitud, GLuint* VAOCubo, int nTriangulosCubo, GLuint* VAOEsfera, int nTriangulosEsfera) {
+Serpiente::Serpiente(int longitud, GLuint* VAOCubo, int nTriangulosCubo, GLuint* VAOEsfera, int nTriangulosEsfera, GLuint textura1, GLuint textura2, GLuint texturaOjos) {
     //si la logitud no se sale del campo se establece a la longitud
     if (longitud < LIMITE) {
         this->longitud = longitud;
@@ -20,8 +23,8 @@ Serpiente::Serpiente(int longitud, GLuint* VAOCubo, int nTriangulosCubo, GLuint*
     //Se crea la cabeza
     this->cabeza = Parte(0, 0, ESCALA / 2.0, ESCALA, 180, VAOCubo, 0, nTriangulosCubo);
     //Se crean los ojos
-    this->ojoDerecho = Parte(-0.3/0.15, 0.25/0.15, 1/0.15, 0.15, 180, VAOEsfera, 0, nTriangulosEsfera);
-    this->ojoIzquierdo = Parte(-0.3/0.15, -0.25/0.15, 1/0.15, 0.15, 180, VAOEsfera, 0, nTriangulosEsfera);
+    this->ojoDerecho = Parte(-OJOS_Y/OJOS_COCIENTE, OJOS_X/OJOS_COCIENTE, 1/OJOS_COCIENTE, OJOS_COCIENTE, 180, VAOEsfera, 0, nTriangulosEsfera);
+    this->ojoIzquierdo = Parte(-OJOS_Y/OJOS_COCIENTE, -OJOS_X/OJOS_COCIENTE, 1/OJOS_COCIENTE, OJOS_COCIENTE, 180, VAOEsfera, 0, nTriangulosEsfera);
     this->direccion = IZQUIERDA;//Se fija una dirección inicial
     //inicializamos las posiciones donde se encuentra el cuerpo de la serpiente
     this->cuerpo.push_back(this->cabeza);
@@ -31,6 +34,20 @@ Serpiente::Serpiente(int longitud, GLuint* VAOCubo, int nTriangulosCubo, GLuint*
     this->anterior = 0;//Tiempo en el que se ha actualizado la posición de la serpiente
     this->velocidad = VELOCIDAD;//Fijamos la velocidad como la velocidad inicial
     this->puntos = 0;//Ponemos los puntos a cero
+
+    //establecemos las texturas alternando entre las partes de la serpiente
+    for (int i = 0; i < this->longitud;i++) {
+        if (i % 2 == 0) {
+            this->cuerpo[i].setTextura(textura1);
+        }
+        else {
+            this->cuerpo[i].setTextura(textura2);
+        }
+    }
+    this->cabeza.setTextura(this->cuerpo[0].getTextura());
+    //ponemos las texturas de los ojos
+    this->ojoDerecho.setTextura(texturaOjos);
+    this->ojoIzquierdo.setTextura(texturaOjos);
 }
 
 bool Serpiente::avanzar(Fruta* comida) {//Función que avanza la serpiente, detecta si se come la fruta y colisiones
@@ -161,22 +178,6 @@ int Serpiente::getPuntos(){
 
 std::vector<Parte> Serpiente::getCuerpo(){
     return this->cuerpo;
-}
-
-void Serpiente::texturizar(GLuint textura1, GLuint textura2, GLuint texturaOjo){
-    //establecemos las texturas alternando entre las partes de la serpiente
-    for (int i = 0; i < this->longitud;i++) {
-        if (i % 2 == 0) {
-            this->cuerpo[i].setTextura(textura1);
-        }
-        else {
-            this->cuerpo[i].setTextura(textura2);
-        }
-    }
-    this->cabeza.setTextura(this->cuerpo[0].getTextura());
-    //ponemos las texturas de los ojos
-    this->ojoDerecho.setTextura(texturaOjo);
-    this->ojoIzquierdo.setTextura(texturaOjo);
 }
 
 void Serpiente::girar(float giro){//Gira la serpiente con un ángulo que se suma al que ya tiene

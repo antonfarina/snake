@@ -32,6 +32,7 @@ void Fruta::colocar(Serpiente *s) {//Función que coloca la fruta en una posición
     //establecemos la posicion a la posicion encontrada
     this->x = x;
     this->y = y;
+    //le ponemos una textura aleatoria
     this->textura = this->texturas[rand() % this->texturas.size()];
 }
 

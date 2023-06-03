@@ -25,7 +25,8 @@ class Serpiente {
         double velocidad;
         int puntos;
     public:
-        Serpiente(int longitud, GLuint* VAOCubo, int nTriangulosCubo, GLuint* VAOEsfera, int nTriangulosEsfera);
+        Serpiente();
+        Serpiente(int longitud, GLuint* VAOCubo, int nTriangulosCubo, GLuint* VAOEsfera, int nTriangulosEsfera, GLuint textura1, GLuint textura2, GLuint texturaOjos);
         bool avanzar(class Fruta* comida);//Función que avanza la serpiente, come la fruta y detecta colisiones
         //Getters y setter de los atributos
         void setDireccion(int direccion);
@@ -35,7 +36,5 @@ class Serpiente {
         int getLongitud();
         int getPuntos();
         std::vector<Parte> getCuerpo();
-        //Función que aporta textura a la serpiente empleando dos texturas distintas y una textura a mayores para los ojos
-        void texturizar(GLuint textura1, GLuint textura2, GLuint texturaOjo);
         void girar(float giro);//Función que gira el cuerpo de la serpiente
 };
