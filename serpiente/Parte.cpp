@@ -81,7 +81,7 @@ void Parte::setNTriangulos(GLuint n) {
     this->nTriangulos = n;
 }
 
-void Parte::dibujar(GLuint shader){
+void Parte::dibujar(GLuint shader){//Función que dibuja la parte (como parte de la serpiente)
     unsigned int modelLoc = glGetUniformLocation(shader, "model");
     //matriz de transformacion
     glm::mat4 model =  glm::mat4();

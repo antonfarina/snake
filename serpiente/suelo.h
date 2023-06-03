@@ -6,8 +6,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "glad.h"
 
-#define LIMITE 10
-#define ESCALA 1
+#define LIMITE 10 //Tamaño del suelo
+#define ESCALA 1 //Escalado del suelo
 class Suelo {
 private:
     int limite;

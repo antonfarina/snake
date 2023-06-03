@@ -9,7 +9,7 @@ Suelo::Suelo(GLuint VAO, GLuint textura1, GLuint textura2) {
 	this->textura2 = textura2;
 }
 
-void Suelo::dibujar(GLuint shader) {
+void Suelo::dibujar(GLuint shader) {//Función que dibuja el suelo
 	//creamos las matrices del modelo
 	glm::mat4 model;
 	//la busco en el shader

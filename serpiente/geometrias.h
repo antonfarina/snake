@@ -3,6 +3,8 @@
 #include <glfw3.h>
 #include <stdio.h>
 
+//Clase con las formas geométricas usadas en el proyecto: cuadrado, cubo y esfera.
+
 //CUADRADO: 1 caras con 2 triangulos y 6 vertices
 //3 coordenadas de normales, 2 de textura, 3 de posicion y 3 de color
 float vertices_cuadrado[] = {

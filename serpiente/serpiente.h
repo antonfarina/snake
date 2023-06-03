@@ -13,7 +13,6 @@
 #define ABAJO 1
 #define IZQUIERDA 2
 #define DERECHA 3
-#define VELOCIDAD 0.3
 
 class Serpiente {
     private:
@@ -27,7 +26,8 @@ class Serpiente {
         int puntos;
     public:
         Serpiente(int longitud, GLuint* VAOCubo, int nTriangulosCubo, GLuint* VAOEsfera, int nTriangulosEsfera);
-        bool avanzar(class Fruta* comida);
+        bool avanzar(class Fruta* comida);//Función que avanza la serpiente, come la fruta y detecta colisiones
+        //Getters y setter de los atributos
         void setDireccion(int direccion);
         int getDireccion();
         void dibujar(GLuint shader);
@@ -35,6 +35,7 @@ class Serpiente {
         int getLongitud();
         int getPuntos();
         std::vector<Parte> getCuerpo();
+        //Función que aporta textura a la serpiente empleando dos texturas distintas y una textura a mayores para los ojos
         void texturizar(GLuint textura1, GLuint textura2, GLuint texturaOjo);
-        void girar(float giro);
+        void girar(float giro);//Función que gira el cuerpo de la serpiente
 };
