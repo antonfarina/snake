@@ -30,6 +30,7 @@ GLuint shaderJuego, shaderTitulos; //Variables que referencian los shaders
 
 bool comenzar = false;//Flag que marca si se ha iniciado el juego
 bool perder = false;//Flag que marca si el jugador ha perdido
+bool controles = false; //Flag que marca si el usuario se encuentra en la página de controles
 
 GLuint camara = 0;//Flag que marca la cámara utilizada
 
@@ -42,7 +43,7 @@ Serpiente serpiente;
 glm::vec3 observador;
 
 //Índices de texturas
-GLuint texturaSerpiente1, texturaSerpiente2, hierba1, hierba2, texturaOjo, texturaPerder, puntos[10], texturaPuntos, texturaSnake, texturaInicio;
+GLuint texturaSerpiente1, texturaSerpiente2, hierba1, hierba2, texturaOjo, texturaPerder, puntos[10], texturaPuntos, texturaSnake, texturaInicio, texturaControles;
 std::unordered_map<unsigned int, GLuint> texturasFruta;//Mapa de las texturas de las frutas
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -223,6 +224,24 @@ void dibujarInicio(GLuint shader) {//Función que dibuja la pantalla de inicio de
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void dibujarControles(GLuint shader) {//Función que dibuja la pantalla de controles de la partida
+	glUseProgram(shader);
+	//pantalla completa
+	glViewport(0, 0, ANCHO, ALTO);
+	unsigned int modelLoc = glGetUniformLocation(shader, "model");
+	//matriz de transformacion
+	glm::mat4 model = glm::mat4();
+	//escalamos
+	model = glm::scale(model, glm::vec3(20, 20, 1));
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glBindTexture(GL_TEXTURE_2D, texturaControles);
+	//La cargo
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+	glBindVertexArray(VAOCuadrado);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 void dibujarPuntos(GLuint shader) {//Función que dibuja los puntos y los títulos del juego
 	glUseProgram(shader);
 	//viewport de la izquierda
@@ -361,6 +380,7 @@ int main() {
 	texturaPuntos = cargaTextura("../texturas/puntos.png");
 	texturaSnake = cargaTextura("../texturas/snake.png");
 	texturaInicio = cargaTextura("../texturas/inicio.png");
+	texturaControles = cargaTextura("../texturas/controles.png");
 	//texturas de los puntos
 	std::string ruta;
 	for (int i = 0; i <= 9; i++) {
@@ -397,25 +417,33 @@ int main() {
 				break;
 		}
 
-		if (!perder) {//mientras no perdamos
-			if (!comenzar) {//si no empezamos
-				//mostramos la pantalla de inicio
-				dibujarInicio(shaderTitulos);
-			}else {
-				//sino dibujamos los puntos y la pantalla del juego
+		if (!controles) {
+			if (!perder) {//mientras no perdamos
+				if (!comenzar) {//si no empezamos
+					//mostramos la pantalla de inicio
+					dibujarInicio(shaderTitulos);
+				}
+				else {
+					//sino dibujamos los puntos y la pantalla del juego
+					dibujarPuntos(shaderTitulos);
+					dibujarJuego(shaderJuego, suelo, serpiente, comida);
+					//avanzamos y comprobamos que no haya colisiones
+					perder = !serpiente.avanzar(&comida);
+				}
+			}
+			else {//si perdemos
+				comenzar = false;
+				camaraAlejada();
+				//dibujamos el fin
 				dibujarPuntos(shaderTitulos);
 				dibujarJuego(shaderJuego, suelo, serpiente, comida);
-				//avanzamos y comprobamos que no haya colisiones
-				perder = !serpiente.avanzar(&comida);
+				dibujarFin(shaderTitulos);
 			}
-		}else {//si perdemos
-			comenzar = false;
-			camaraAlejada();
-			//dibujamos el fin
-			dibujarPuntos(shaderTitulos);
-			dibujarJuego(shaderJuego, suelo, serpiente, comida);
-			dibujarFin(shaderTitulos);
 		}
+		else {
+			dibujarControles(shaderTitulos);
+		}
+		
 
 		glBindVertexArray(0);
 		glfwSwapBuffers(window);
@@ -561,6 +589,11 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			break;
 		case 49://Número 1 cámara en la serpiente
 			camara = 1;
+			break;
+		case 67://letra c
+			if (action == GLFW_RELEASE && !comenzar) {
+				controles = !controles;
+			}
 			break;
 		default:
 			break;
