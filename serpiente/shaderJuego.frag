@@ -11,12 +11,14 @@ uniform vec3 colorLuz;
 uniform vec3 posicionLuzSerpiente;
 uniform vec3 direccionLuzSerpiente;
 uniform vec3 posicionLuzFruta;
-
+uniform vec3 observador;
 uniform sampler2D texture1;
 
 void main(){
-	vec3 ambient = 0.25 * colorLuz;
+	//luz ambiente
+	vec3 ambient = 0.75 * colorLuz;
 
+	//luz difusa en la cabeza de la serpiente
 	vec3 ld = normalize(-direccionLuzSerpiente);
 	vec3 fd = normalize(vec3((-FragPos + posicionLuzSerpiente)));
 	vec3 norm; 
@@ -38,10 +40,16 @@ void main(){
 	diff = max(dot(norm, luzDir), 0.0);
 	vec3 difusaFruta = 1.1 * diff * vec3(1.0f, 0.7f, 1.0f);
 
+	//luz especular
+	vec3 viewDir = normalize(observador - FragPos);
+	vec3 reflectDir = reflect(-luzDir, norm);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128);
+	vec3 especular = spec * colorLuz;
+
 	//comprobamos si el objeto tiene textura
 	if(texture2D(texture1, TexCoord)==vec4(0.0,0.0,0.0,1.0)){
 		//si no tiene lo pintamos de su color
-		vec3 result = ((ambient + difusaCabeza + difusaFruta) * objectColor)/2;
+		vec3 result = ((ambient + difusaCabeza + difusaFruta + especular) * objectColor);
 		FragColor = vec4(result, 1.0);
 	}else{
 		vec3 result = ((ambient + difusaCabeza + difusaFruta) * vec3(1.0, 1.0, 1.0))/2;

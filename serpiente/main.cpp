@@ -39,10 +39,10 @@ GLuint VAOCubo;
 GLuint VAOEsfera;
 
 Serpiente serpiente;
-
+glm::vec3 observador;
 
 //Índices de texturas
-GLuint texturaSerpiente1, texturaSerpiente2, hierba1, hierba2, texturaOjo, texturaPerder, puntos[10], texturaPuntos, texturaSnake;
+GLuint texturaSerpiente1, texturaSerpiente2, hierba1, hierba2, texturaOjo, texturaPerder, puntos[10], texturaPuntos, texturaSnake, texturaInicio;
 std::unordered_map<unsigned int, GLuint> texturasFruta;//Mapa de las texturas de las frutas
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -56,7 +56,8 @@ void camaraAlejada() {//Visión del juego desde una posición cenital (usual del j
 	//Cargamos la identidad
 	view = glm::mat4();
 	//establecemos la posicion del observador
-	view = glm::lookAt(glm::vec3(0, 0, 20 * ESCALA), glm::vec3(.0f, .0f, .0f), glm::vec3(.0f, 1, .0f));
+	observador = glm::vec3(0, 0, 20 * ESCALA);
+	view = glm::lookAt(observador, glm::vec3(.0f, .0f, .0f), glm::vec3(.0f, 1, .0f));
 	unsigned int viewLoc = glad_glGetUniformLocation(shaderJuego, "view");
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	//Matriz de proyección
@@ -74,7 +75,7 @@ void camaraCabeza() {//Visión del juego desde la perspectiva de la serpiente
 	//Cargamos la identidad
 	view = glm::mat4();
 	//establecemos la posicion del observador
-	glm::vec3 observador = glm::vec3(serpiente.getCabeza().getX() - 8*glm::cos(glm::radians((float)serpiente.getCabeza().getGiro())), serpiente.getCabeza().getY() - 8*glm::sin(glm::radians((float)serpiente.getCabeza().getGiro())), 8);
+	observador = glm::vec3(serpiente.getCabeza().getX() - 8 * glm::cos(glm::radians((float)serpiente.getCabeza().getGiro())), serpiente.getCabeza().getY() - 8*glm::sin(glm::radians((float)serpiente.getCabeza().getGiro())), 8);
 	glm::vec3 vision = glm::vec3(serpiente.getCabeza().getX() + glm::cos(glm::radians((float)serpiente.getCabeza().getGiro())), serpiente.getCabeza().getY() + glm::sin(glm::radians((float)serpiente.getCabeza().getGiro())), 0);
 	view = glm::lookAt(observador,vision, glm::vec3(.0f, 0, 1.0f));
 	unsigned int viewLoc = glad_glGetUniformLocation(shaderJuego, "view");
@@ -101,6 +102,9 @@ void iluminacion(Fruta comida) {
 	//luz difusa en la fruta
 	lightPosLoc = glGetUniformLocation(shaderJuego, "posicionLuzFruta");
 	glUniform3f(lightPosLoc, comida.getX(), comida.getY(), 8);
+	//luz especular
+	GLuint observadorLoc = glGetUniformLocation(shaderJuego, "observador");
+	glUniform3f(observadorLoc, observador.x, observador.y, observador.z);
 }
 
 
@@ -208,11 +212,10 @@ void dibujarInicio(GLuint shader) {//Función que dibuja la pantalla de inicio de
 	unsigned int modelLoc = glGetUniformLocation(shader, "model");
 	//matriz de transformacion
 	glm::mat4 model = glm::mat4();
-	//trasladamos y escalamos
-	//model = glm::translate(model, glm::vec3(0, 0, 1));
+	//escalamos
 	model = glm::scale(model, glm::vec3(20, 20, 1));
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	//glBindTexture(GL_TEXTURE_2D, texturaPerder);
+	glBindTexture(GL_TEXTURE_2D, texturaInicio);
 	//La cargo
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 	glBindVertexArray(VAOCuadrado);
@@ -229,8 +232,8 @@ void dibujarPuntos(GLuint shader) {//Función que dibuja los puntos y los títulos
 	glm::mat4 model;
 	//dibujamos el titulo snake
 	model = glm::mat4();
-	model = glm::translate(model, glm::vec3(0, 7, 0));
-	model = glm::scale(model, glm::vec3(10, 5, 1));
+	model = glm::translate(model, glm::vec3(0, 6, 0));
+	model = glm::scale(model, glm::vec3(15, 9, 1));
 	//La cargo
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 	glBindVertexArray(VAOCuadrado);
@@ -239,7 +242,7 @@ void dibujarPuntos(GLuint shader) {//Función que dibuja los puntos y los títulos
 
 	//dibujamos el titulo puntos
 	model = glm::mat4();
-	model = glm::translate(model, glm::vec3(0, 3, 0));
+	model = glm::translate(model, glm::vec3(0, -1, 0));
 	model = glm::scale(model, glm::vec3(10, 3, 1));
 	//La cargo
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -250,7 +253,7 @@ void dibujarPuntos(GLuint shader) {//Función que dibuja los puntos y los títulos
 	//dibujamos los puntos
 	for (int i = -3; i <= 3; i+=3) {
 		glm::mat4 model = glm::mat4();
-		model = glm::translate(model, glm::vec3(i, -2, 0));
+		model = glm::translate(model, glm::vec3(i, -6, 0));
 		model = glm::scale(model, glm::vec3(3, 4, 1));
 		//La cargo
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -357,6 +360,7 @@ int main() {
 	texturaPerder = cargaTextura("../texturas/perder.png");
 	texturaPuntos = cargaTextura("../texturas/puntos.png");
 	texturaSnake = cargaTextura("../texturas/snake.png");
+	texturaInicio = cargaTextura("../texturas/inicio.png");
 	//texturas de los puntos
 	std::string ruta;
 	for (int i = 0; i <= 9; i++) {
@@ -379,7 +383,7 @@ int main() {
 		// -----
 		processInput(window);
 
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);//Borro el buffer de la ventana
+		glClearColor(7/255.0, 5/255.0, 18/255.0, 1.0f);//Borro el buffer de la ventana
 		glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
 
 		switch (camara)	{//Se selecciona la cámara
@@ -406,6 +410,7 @@ int main() {
 			}
 		}else {//si perdemos
 			comenzar = false;
+			camaraAlejada();
 			//dibujamos el fin
 			dibujarPuntos(shaderTitulos);
 			dibujarJuego(shaderJuego, suelo, serpiente, comida);
