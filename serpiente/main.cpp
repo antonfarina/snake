@@ -232,7 +232,7 @@ void dibujarControles(GLuint shader) {//Función que dibuja la pantalla de contro
 	//matriz de transformacion
 	glm::mat4 model = glm::mat4();
 	//escalamos
-	model = glm::scale(model, glm::vec3(20, 20, 1));
+	model = glm::scale(model, glm::vec3(15, 20, 1));
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glBindTexture(GL_TEXTURE_2D, texturaControles);
 	//La cargo
@@ -308,7 +308,7 @@ void dibujarJuego(GLuint shader, Suelo suelo, Serpiente serpiente, Fruta comida)
 
 void openGlInit() {
 	glClearDepth(1.0f); //Valor z-buffer
-	glClearColor(0.0f, 0.0f, 0.1f, 1.0f); //valor limpieza buffer color
+	glClearColor(7 / 255.0, 5 / 255.0, 18 / 255.0, 1.0f); //valor limpieza buffer color
 	glEnable(GL_DEPTH_TEST); //z-buffer
 	glEnable(GL_CULL_FACE); //ocultacion caras back
 	glCullFace(GL_BACK);
@@ -573,15 +573,17 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		break;
 		case 32://Dándole al espacio se empieza o reinicia el juego
 			if (action == GLFW_RELEASE) {
-				if (perder) {//si hemos perdido volvemos a empezar
-					comenzar = false;
-					//reseteamos la serpiente
-					serpiente = Serpiente(3, &VAOCubo, 36, &VAOEsfera, 1080, texturaSerpiente1, texturaSerpiente2, texturaOjo);
+				if (!controles) {
+					if (perder) {//si hemos perdido volvemos a empezar
+						comenzar = false;
+						//reseteamos la serpiente
+						serpiente = Serpiente(3, &VAOCubo, 36, &VAOEsfera, 1080, texturaSerpiente1, texturaSerpiente2, texturaOjo);
+					}
+					else {//si no hemos perdido empezamos
+						comenzar = true;
+					}
+					perder = false;
 				}
-				else {//si no hemos perdido empezamos
-					comenzar = true;
-				}
-				perder = false;
 			}
 			break;
 		case 48://Número cambia a cámara alejada
@@ -591,7 +593,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			camara = 1;
 			break;
 		case 67://letra c
-			if (action == GLFW_RELEASE && !comenzar) {
+			if (action == GLFW_RELEASE && !comenzar && !perder) {
 				controles = !controles;
 			}
 			break;

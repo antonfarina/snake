@@ -8,6 +8,7 @@
 
 #define LIMITE 10 //Tamaño del suelo
 #define ESCALA 1 //Escalado del suelo
+
 class Suelo {
 private:
     int limite;
