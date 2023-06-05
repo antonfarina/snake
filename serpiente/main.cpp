@@ -190,7 +190,6 @@ void dibujarFin(GLuint shader) {//Función que dibuja la pantalla de fin de parti
 	glUseProgram(shader);
 	//viewport de la derecha
 	glViewport(ANCHO / 2.0, 0, ANCHO / 2, ALTO);
-	camaraAlejada();
 	unsigned int modelLoc = glGetUniformLocation(shader, "model");
 	//matriz de transformacion
 	glm::mat4 model = glm::mat4();
@@ -433,6 +432,7 @@ int main() {
 			}
 			else {//si perdemos
 				comenzar = false;
+				camara = 0;
 				camaraAlejada();
 				//dibujamos el fin
 				dibujarPuntos(shaderTitulos);
@@ -592,7 +592,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		case 49://Número 1 cámara en la serpiente
 			camara = 1;
 			break;
-		case 67://letra c
+		case 67://letra c para acceder a los controles
 			if (action == GLFW_RELEASE && !comenzar && !perder) {
 				controles = !controles;
 			}
