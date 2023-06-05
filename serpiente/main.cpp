@@ -586,11 +586,11 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 				}
 			}
 			break;
-		case 48://Número cambia a cámara alejada
+		case 48://Número 0 cambia a cámara alejada
 			camara = 0;
 			break;
 		case 49://Número 1 cámara en la serpiente
-			camara = 1;
+			if(comenzar) camara = 1;
 			break;
 		case 67://letra c para acceder a los controles
 			if (action == GLFW_RELEASE && !comenzar && !perder) {
